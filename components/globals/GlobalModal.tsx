@@ -1,59 +1,51 @@
-//https://ui.shadcn.com/docs/components/drawer
+"use client";
+import React, { useState } from "react";
+
+import { useModal } from "@/app/providers/modalProvider";
 import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-
-} from '@/components/ui/drawer'
-
-
-import React from 'react'
-import { Button } from '../ui/button'
-import { useModal } from '@/app/providers/modalProvider'
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "../ui/button";
 
 type Props = {
-  title: string
-  subheading: string
-  children: React.ReactNode
-  defaultOpen?: boolean
-}
+  title: string;
+  onConfirm: () => Promise<void>;
+  children: string | React.ReactNode;
+  defaultOpen?: boolean;
+};
 
-const GlobalModal = ({ children, subheading, title ,defaultOpen}: Props) => {
-  const { isOpen, setClose } = useModal()
-  const handleClose = () => setClose()
-
+const GlobalModal = ({ children, title, defaultOpen, onConfirm }: Props) => {
+  const { isOpen, setClose } = useModal();
+  const [loading, setLoading] = useState(false);
+  const onSubmit = async () => {
+    setLoading(true);
+    await onConfirm();
+    setLoading(false);
+  };
   return (
-    <Drawer
-      open={isOpen}
-      onClose={handleClose}
-      defaultOpen={defaultOpen}
-    >
-      <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle className="text-center">{title}</DrawerTitle>
-          <DrawerDescription className="text-center flex flex-col items-center gap-4 h-96 overflow-auto">
-            {subheading}
-            {children}
-          </DrawerDescription>
-        </DrawerHeader>
-        <DrawerFooter className="flex flex-col gap-4 bg-background border-t-[1px] border-t-muted">
-          <DrawerClose>
-            <Button
-              variant="ghost"
-              className="w-full"
-              onClick={handleClose}
-            >
-              Close
-            </Button>
-          </DrawerClose>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
-  )
-}
+    <Dialog open={isOpen} modal defaultOpen={defaultOpen}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription className="mt-2">{children}</DialogDescription>
+        </DialogHeader>
 
-export default GlobalModal
+        <DialogFooter>
+          <Button onClick={setClose} disabled={loading} variant={"outline"}>
+            Cancel
+          </Button>
+          <Button onClick={onSubmit} disabled={loading}>
+            Confirm
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default GlobalModal;

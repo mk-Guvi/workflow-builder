@@ -34,12 +34,12 @@ const MenuOptions = () => {
                         "group h-8 w-8 flex items-center justify-center  scale-[1.5] rounded-lg p-[3px]  cursor-pointer",
                         {
                           "dark:bg-[#2F006B] bg-[#EEE0FF] ":
-                            pathName === menuItem.href,
+                          pathName?.includes(menuItem.href) ,
                         }
                       )}
                     >
                       <menuItem.Component
-                        selected={pathName === menuItem.href}
+                        selected={pathName?.includes(menuItem.href)}
                       />
                     </Link>
                   </li>

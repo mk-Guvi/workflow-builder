@@ -41,6 +41,8 @@ export const onUpdateWorkflow = async (workflowData: Partial<Workflow>) => {
 
   try {
     // Update existing workflow
+
+    delete workflowData?.is_deleted
     const updatedWorkflow = await db.workflows.update({
       where: { id: workflowData?.id },
       data: {
@@ -56,6 +58,43 @@ export const onUpdateWorkflow = async (workflowData: Partial<Workflow>) => {
       };
     } else {
       return { message: "Workflow not found or update failed" };
+    }
+  } catch (error) {
+    console.error("Error updating workflow:", error);
+    return {
+      message: "Failed to update workflow",
+      error: (error as Record<string, string>).message,
+    };
+  }
+};
+
+export const onDeleteWorkflow = async (workflowId:string) => {
+  const userId = "1"; // Replace with actual user authentication logic
+
+  if (!userId) {
+    return { message: "Unauthorized" };
+  }
+
+  if (!workflowId) {
+    return { message: "Workflow ID is required for updating" };
+  }
+
+  try {
+    const updatedWorkflow = await db.workflows.update({
+      where: { id: workflowId },
+      data: {
+        is_deleted:true,
+        updatedAt: new Date(),
+      },
+    });
+
+    if (updatedWorkflow) {
+      return {
+        message: "Workflow Deleted successfully",
+        workflow: updatedWorkflow,
+      };
+    } else {
+      return { message: "Workflow not found or delete failed" };
     }
   } catch (error) {
     console.error("Error updating workflow:", error);
@@ -95,6 +134,7 @@ export const onGetWorkflows = async ({
     // Build the where clause with correct Prisma types
     const whereClause: Prisma.workflowsWhereInput = {
       userId,
+      is_deleted: false,
       ...(search
         ? {
             OR: [

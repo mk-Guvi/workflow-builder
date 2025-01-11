@@ -14,6 +14,7 @@ export const WorkflowFormSchema = z.object({
     description: string;
     userId: string;
     createdAt: Date;
+    is_deleted: boolean,
     updatedAt: Date;
   };
   

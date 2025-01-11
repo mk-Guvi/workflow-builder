@@ -22,18 +22,18 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { useModal } from "@/app/providers/modalProvider";
 import {
   onCreateWorkflow,
   onUpdateWorkflow,
-} from "../_actions/workflow-connections";
+} from "../_actions/workflowsActions";
+import { useDrawer } from "@/app/providers/drawerProvider";
 
 type Props = {
   workflow?: Workflow;
 };
 
 const Workflowform = ({ workflow }: Props) => {
-  const { setClose } = useModal();
+  const { setClose } = useDrawer();
   const form = useForm<z.infer<typeof WorkflowFormSchema>>({
     mode: "onChange",
     resolver: zodResolver(WorkflowFormSchema),

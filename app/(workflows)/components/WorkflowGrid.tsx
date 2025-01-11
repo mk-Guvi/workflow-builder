@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import WorkflowCard from './WorkflowCard';
-import { onGetWorkflows } from "../_actions/workflow-connections";
+import { onGetWorkflows } from "../_actions/workflowsActions";
 import { redirect } from "next/navigation";
 
 export default async function WorkflowGrid() {

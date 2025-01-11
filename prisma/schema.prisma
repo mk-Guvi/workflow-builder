@@ -22,4 +22,5 @@ model workflows {
   userId      String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now())
+  is_deleted  Boolean  @default(false)
 }

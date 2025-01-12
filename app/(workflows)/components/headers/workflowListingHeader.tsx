@@ -1,27 +1,24 @@
 "use client";
-import GlobalDrawer from "@/components/globals/GlobalDrawer";
+
 import { Button } from "@/components/ui/button";
 import React from "react";
 import Workflowform from "../workflowForm";
-import { useDrawer } from "@/app/providers/drawerProvider";
-
-
+import { useModal } from "@/app/providers/modalProvider";
+import GlobalModal from "@/components/globals/GlobalModal";
 
 const WorkflowListingHeader = () => {
-  const { setOpen } = useDrawer();
-  
+  const { setOpen } = useModal();
 
   const handleClick = () => {
     setOpen(
-      <GlobalDrawer
+      <GlobalModal
         title="Create a Workflow Automation"
-        subheading="Workflows are a powerfull that help you automate tasks."
+        subTitle="Workflows are a powerfull that help you automate tasks."
       >
         <Workflowform />
-      </GlobalDrawer>
+      </GlobalModal>
     );
   };
-
 
   return (
     <div className="flex flex-row gap-6 justify-between items-center px-4 py-4 w-full dark:bg-black ">

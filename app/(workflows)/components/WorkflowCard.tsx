@@ -10,10 +10,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Workflow } from "@/lib/types";
 import { EditIcon, Trash2 } from "lucide-react";
-import GlobalDrawer from "@/components/globals/GlobalDrawer";
 import Workflowform from "./workflowForm";
 import Link from "next/link";
-import { useDrawer } from "@/app/providers/drawerProvider";
 import GlobalModal from "@/components/globals/GlobalModal";
 import { useModal } from "@/app/providers/modalProvider";
 import { onDeleteWorkflow } from "../_actions/workflowsActions";
@@ -25,15 +23,15 @@ type WorkflowCardProps = {
 };
 
 export default function WorkflowCard({ workflow }: WorkflowCardProps) {
-  const { setOpen } = useDrawer();
+  const { setOpen } = useModal();
   const router = useRouter();
   const { setOpen: setOpenModal,setClose } = useModal();
 
   const handleClick = () => {
     setOpen(
-      <GlobalDrawer title="Update Workflow" subheading={`${workflow.name}`}>
+      <GlobalModal title="Update Workflow" subTitle={`${workflow.name}`}>
         <Workflowform workflow={workflow} />
-      </GlobalDrawer>
+      </GlobalModal>
     );
   };
   const onDelete = async () => {

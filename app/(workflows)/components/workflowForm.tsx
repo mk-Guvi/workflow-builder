@@ -5,7 +5,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Card, CardContent, } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 import {
   Form,
@@ -26,14 +26,17 @@ import {
   onCreateWorkflow,
   onUpdateWorkflow,
 } from "../_actions/workflowsActions";
-import { useDrawer } from "@/app/providers/drawerProvider";
+import { useModal } from "@/app/providers/modalProvider";
+
 
 type Props = {
   workflow?: Workflow;
 };
 
 const Workflowform = ({ workflow }: Props) => {
-  const { setClose } = useDrawer();
+  const {setClose}=useModal()
+
+
   const form = useForm<z.infer<typeof WorkflowFormSchema>>({
     mode: "onChange",
     resolver: zodResolver(WorkflowFormSchema),
@@ -53,24 +56,30 @@ const Workflowform = ({ workflow }: Props) => {
         name: values.name,
         description: values.description,
       });
+      
       if (response) {
         toast.message(response.message);
         router.refresh();
+        setClose();
+      }else{
+        toast.error("Something Went Wrong")
       }
-      setClose();
+      
     } else {
       const response = await onCreateWorkflow(values.name, values.description);
       if (response) {
         toast.message(response.message);
         router.refresh();
+        setClose();
+      }else{
+        toast.error("Something Went Wrong")
       }
-      setClose();
+      
     }
   };
 
   return (
-    <Card className="w-full max-w-[650px] py-6 border mt-2">
-     
+    <Card className="w-full  h-fit  border ">
       <CardContent>
         <Form {...form}>
           <form
@@ -105,15 +114,30 @@ const Workflowform = ({ workflow }: Props) => {
                 </FormItem>
               )}
             />
-            <Button className="mt-4" disabled={isLoading} type="submit">
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving
-                </>
-              ) : (
-                "Save Settings"
-              )}
-            </Button>
+
+            <footer className="flex items-center gap-2 w-full flex-wrap">
+              <Button
+                variant={"outline"}
+                className="flex-1"
+                onClick={ ()=>{
+                  console.log("Im")
+                  setClose()
+                }}
+                type="button"
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+              <Button className="flex-1" disabled={isLoading} type="submit">
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving
+                  </>
+                ) : (
+                  "Save Settings"
+                )}
+              </Button>
+            </footer>
           </form>
         </Form>
       </CardContent>

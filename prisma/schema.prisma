@@ -15,11 +15,10 @@ datasource db {
 
 model workflows {
   id          String   @id @default(uuid())
-  nodes       String[] 
-  edges       String[]
+  is_active   Boolean  @default(false)
   name        String
   description String
-  userId      String
+  user_id      String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now())
   is_deleted  Boolean  @default(false)

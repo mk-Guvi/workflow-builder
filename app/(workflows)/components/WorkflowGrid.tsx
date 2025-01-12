@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
-import WorkflowCard from './WorkflowCard';
+import WorkflowCard from "./WorkflowCard";
 import { onGetWorkflows } from "../_actions/workflowsActions";
-import { redirect } from "next/navigation";
+import Link from "next/link";
 
 export default async function WorkflowGrid() {
   const { error, workflows } = await onGetWorkflows();
@@ -10,7 +10,9 @@ export default async function WorkflowGrid() {
     return (
       <div className="text-center p-4">
         <p className="text-red-500 mb-4">Error: {error}</p>
-        <Button onClick={() =>redirect("/workflows")}>Retry</Button>
+        <Link href={"/"}>
+        <Button>Retry</Button>
+        </Link>
       </div>
     );
   }
@@ -27,4 +29,3 @@ export default async function WorkflowGrid() {
     </div>
   );
 }
-

@@ -9,18 +9,22 @@ export const WorkflowFormSchema = z.object({
 
 export type TNodeTypes = "WEBHOOK_NODE" | "CODE_NODE" | "WEBHOOK_RESPONSE_NODE";
 
-export interface CommonNodeI extends Node {
-  id: string;
-  type: string;
-  position: { x: number; y: number };
+interface CommonDataI{
   label: string;
   icon?: string;
   color?: string;
-  nodeType: TNodeTypes;
-  description?: string;
+  description?: string; 
+}
+type AllNodesDataI = WebhookNodeDataI | WebhookResponseNodeDataI | CodeNodeDataI;
+
+export interface AllNodesI extends Node {
+  id: string;
+  type: TNodeTypes;
+  position: { x: number; y: number };
+  data: AllNodesDataI&{[key:string]:unknown}
 }
 
-export interface CodeNodeI extends CommonNodeI {
+export interface CodeNodeDataI extends CommonDataI {
   parameters: {
     data: string;
     type: "JS";
@@ -36,8 +40,8 @@ export interface CodeNodeI extends CommonNodeI {
   };
 }
 
-export interface WebhookResponseNodeI extends CommonNodeI {
-  paramters: {
+export interface WebhookResponseNodeDataI extends CommonDataI{
+  parameters: {
     respondWith: "TEXT" | "JSON";
     responseCode?: number;
     responseHeaders: { label: string; value: string }[];
@@ -53,8 +57,8 @@ export interface WebhookResponseNodeI extends CommonNodeI {
   };
 }
 
-export interface WebhookNodeI extends CommonNodeI {
-  paramters: {
+export interface WebhookNodeDataI extends CommonDataI{
+  parameters: {
     type: "GET" | "POST";
     path: string;
     respondType: "IMMEDIATELY" | "LAST_NODE" | "RESPONSE_WRBHOOOK";
@@ -65,7 +69,7 @@ export interface WebhookNodeI extends CommonNodeI {
   };
 }
 
-export type AllNodesI = WebhookNodeI | WebhookResponseNodeI | CodeNodeI;
+
 
 export interface LinkI extends Edge {
   id: string;

@@ -4,6 +4,7 @@ import { create } from "zustand";
 type StoreState = {
   loading: boolean;
   error: string;
+  selectedNode: string;
   workflowDetails: Workflow | null;
   draftState: {
     edges: LinkI[];
@@ -17,11 +18,14 @@ type StoreState = {
 
 type Store = StoreState & {
   update: (partialState: Partial<StoreState>) => void;
+  addNode: (node: AllNodesI) => void;
+  updateNodes: (nodes: AllNodesI[]) => void;
 };
 
 export const useWorkflowStore = create<Store>((set) => ({
   loading: false,
   error: "",
+  selectedNode: "",
   workflowDetails: null,
   draftState: {
     edges: [],
@@ -32,4 +36,20 @@ export const useWorkflowStore = create<Store>((set) => ({
     nodes: [],
   },
   update: (partialState) => set((state) => ({ ...state, ...partialState })),
+  updateNodes: (nodes: AllNodesI[]) =>
+    set((state) => ({
+      ...state,
+      draftState: {
+        ...state.draftState,
+        nodes,
+      },
+    })),
+  addNode: (node: AllNodesI) =>
+    set((state) => ({
+      ...state,
+      draftState: {
+        ...state.draftState,
+        nodes: [...state.draftState.nodes, node],
+      },
+    })),
 }));

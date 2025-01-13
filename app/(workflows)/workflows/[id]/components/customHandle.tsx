@@ -1,6 +1,7 @@
 import React, { CSSProperties } from "react";
 import { Handle, HandleProps } from "@xyflow/react";
-import { useWorkflowStore } from "@/store";
+import { useWorkflowStore } from "@/app/store";
+
 
 
 type Props = HandleProps & { style?: CSSProperties };
@@ -23,7 +24,7 @@ const CustomHandle = (props: Props) => {
         ).length;
 
         if (targetFromHandleInState === 1) return false;
-        if (sourceNode?.type === "Condition") return true;
+        if (sourceNode?.type === "WEBHOOK_NODE") return true;
         if (sourcesFromHandleInState < 1) return true;
         return false;
       }}

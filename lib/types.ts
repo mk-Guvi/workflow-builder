@@ -80,10 +80,8 @@ export interface LinkI extends Edge {
 export type Workflow = {
   name: string;
   id: string;
-  nodes: string[];
-  edges: string[];
   description: string;
-  userId: string;
+  user_id: string;
   createdAt: Date;
   is_deleted: boolean;
   updatedAt: Date;

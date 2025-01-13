@@ -9,17 +9,15 @@ import {
 import { Prisma } from "@prisma/client";
 
 export const onCreateWorkflow = async (name: string, description: string) => {
-  const userId = "1";
+  const user_id = "1";
 
-  if (userId) {
+  if (user_id) {
     //create new workflow
     const workflow = await db.workflows.create({
       data: {
-        userId,
+        user_id,
         name,
-        description,
-        nodes: [],
-        edges: [],
+        description
       },
     });
 
@@ -29,9 +27,9 @@ export const onCreateWorkflow = async (name: string, description: string) => {
 };
 
 export const onUpdateWorkflow = async (workflowData: Partial<Workflow>) => {
-  const userId = "1"; // Replace with actual user authentication logic
+  const user_id = "1"; // Replace with actual user authentication logic
 
-  if (!userId) {
+  if (!user_id) {
     return { message: "Unauthorized" };
   }
 
@@ -69,9 +67,9 @@ export const onUpdateWorkflow = async (workflowData: Partial<Workflow>) => {
 };
 
 export const onDeleteWorkflow = async (workflowId:string) => {
-  const userId = "1"; // Replace with actual user authentication logic
+  const user_id = "1"; // Replace with actual user authentication logic
 
-  if (!userId) {
+  if (!user_id) {
     return { message: "Unauthorized" };
   }
 
@@ -112,9 +110,9 @@ export const onGetWorkflows = async ({
   sortOrder = "desc",
 }: GetWorkflowsParams = {}): Promise<GetWorkflowsResponse> => {
   try {
-    const userId = "1";
+    const user_id = "1";
 
-    if (!userId) {
+    if (!user_id) {
       return {
         error: "Unauthorized",
         workflows: [],
@@ -133,7 +131,7 @@ export const onGetWorkflows = async ({
 
     // Build the where clause with correct Prisma types
     const whereClause: Prisma.workflowsWhereInput = {
-      userId,
+      user_id,
       is_deleted: false,
       ...(search
         ? {

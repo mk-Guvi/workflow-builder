@@ -65,9 +65,9 @@ export default function WorkflowCard({ workflow }: WorkflowCardProps) {
         </p>
         <p className="text-sm">{workflow.description}</p>
       </CardContent>
-      <CardFooter className="flex items-center gap-2 justify-evenly flex-wrap">
-        <Link href={`/workflows/${workflow?.id}`}>
-          <Button variant={"outline"} className="w-fit">
+      <CardFooter className="flex items-center gap-2 flex-wrap">
+        <Link href={`/workflows/${workflow?.id}`} className="flex-1">
+          <Button variant={"outline"} className="w-full">
             View Workflow
           </Button>
         </Link>

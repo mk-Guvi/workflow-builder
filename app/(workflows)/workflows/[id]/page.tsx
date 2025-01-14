@@ -137,6 +137,7 @@ console.log({draftState})
             onDragOver={onDragOver}
             onInit={setReactFlowInstance}
             nodes={draftState.nodes}
+            fitView
             edges={draftState.edges}
             nodeTypes={{
               "WEBHOOK_NODE":CommonNode,

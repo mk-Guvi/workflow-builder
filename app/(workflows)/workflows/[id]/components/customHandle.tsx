@@ -2,8 +2,6 @@ import React, { CSSProperties } from "react";
 import { Handle, HandleProps } from "@xyflow/react";
 import { useWorkflowStore } from "@/app/store";
 
-
-
 type Props = HandleProps & { style?: CSSProperties };
 
 const CustomHandle = (props: Props) => {
@@ -28,7 +26,6 @@ const CustomHandle = (props: Props) => {
         if (sourcesFromHandleInState < 1) return true;
         return false;
       }}
-      className="!-bottom-2 !h-4 !w-4 dark:bg-neutral-800"
     />
   );
 };

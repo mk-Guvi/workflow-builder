@@ -9,22 +9,22 @@ export const WorkflowFormSchema = z.object({
 
 export type TNodeTypes = "WEBHOOK_NODE" | "CODE_NODE" | "WEBHOOK_RESPONSE_NODE";
 
-interface CommonDataI{
-  label: string;
-  icon?: string;
-  color?: string;
-  description?: string; 
-}
-type AllNodesDataI = WebhookNodeDataI | WebhookResponseNodeDataI | CodeNodeDataI;
+
+export type AllNodesDataI = WebhookNodeDataI | WebhookResponseNodeDataI | CodeNodeDataI;
 
 export interface AllNodesI extends Node {
   id: string;
   type: TNodeTypes;
   position: { x: number; y: number };
-  data: AllNodesDataI&{[key:string]:unknown}
+  data: {
+    label: string;
+    icon?: string;
+    color?: string;
+    description?: string; 
+  }
 }
 
-export interface CodeNodeDataI extends CommonDataI {
+export interface CodeNodeDataI  {
   parameters: {
     data: string;
     type: "JS";
@@ -40,7 +40,7 @@ export interface CodeNodeDataI extends CommonDataI {
   };
 }
 
-export interface WebhookResponseNodeDataI extends CommonDataI{
+export interface WebhookResponseNodeDataI {
   parameters: {
     respondWith: "TEXT" | "JSON";
     responseCode?: number;
@@ -57,7 +57,7 @@ export interface WebhookResponseNodeDataI extends CommonDataI{
   };
 }
 
-export interface WebhookNodeDataI extends CommonDataI{
+export interface WebhookNodeDataI {
   parameters: {
     type: "GET" | "POST";
     path: string;

@@ -7,13 +7,15 @@ interface DrawerProviderProps {
   children: React.ReactNode;
 }
 
-export type DrawerData = Record<string,any>
+export type DrawerData = Record<string, any>;
 
 type DrawerContextType = {
   data: DrawerData;
   isOpen: boolean;
   setOpen: (Drawer: React.ReactNode, fetchData?: () => Promise<any>) => void;
   setClose: () => void;
+  setFullScreen: (value: boolean) => void;
+  isFullScreen: boolean;
 };
 
 export const DrawerContext = createContext<DrawerContextType>({
@@ -21,6 +23,8 @@ export const DrawerContext = createContext<DrawerContextType>({
   isOpen: false,
   setOpen: (Drawer: React.ReactNode, fetchData?: () => Promise<any>) => {},
   setClose: () => {},
+  isFullScreen: false,
+  setFullScreen: () => {},
 });
 
 const DrawerProvider: React.FC<DrawerProviderProps> = ({ children }) => {
@@ -28,6 +32,7 @@ const DrawerProvider: React.FC<DrawerProviderProps> = ({ children }) => {
   const [data, setData] = useState<DrawerData>({});
   const [showingDrawer, setShowingDrawer] = useState<React.ReactNode>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -46,15 +51,22 @@ const DrawerProvider: React.FC<DrawerProviderProps> = ({ children }) => {
     }
   };
 
+  const setFullScreen = (value: boolean) => {
+    setIsFullScreen(value);
+  };
+
   const setClose = () => {
     setIsOpen(false);
     setData({});
+    setIsFullScreen(false);
   };
 
   if (!isMounted) return null;
 
   return (
-    <DrawerContext.Provider value={{ data, setOpen, setClose, isOpen }}>
+    <DrawerContext.Provider
+      value={{ data, isFullScreen, setFullScreen, setOpen, setClose, isOpen }}
+    >
       {children}
       {showingDrawer}
     </DrawerContext.Provider>

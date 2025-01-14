@@ -21,7 +21,6 @@ import { AllNodesI, TNodeTypes } from "@/lib/types";
 import { toast } from "sonner";
 import CommonNode from "./components/CommonNode";
 import { useWorkflowStore } from "@/app/store";
-import { Tooltip, TooltipProvider } from "@/components/ui/tooltip";
 
 function EditorPage() {
   const { draftState, addNode, updateNodes } = useWorkflowStore();
@@ -75,28 +74,26 @@ function EditorPage() {
         y: event.clientY,
       });
 
-      if (type === "WEBHOOK_NODE") {
-        const node: AllNodesI = {
-          id: v4(),
-          type,
-          position,
-          data: {
-            label: "Webhook Node",
-            description: "",
-            parameters: {
-              path: v4(),
-              respondType: "IMMEDIATELY",
-              type: "GET",
-            },
-            settings: {
-              allowMultipleHttps: false,
-              notes: "",
-            },
-          },
-        };
+      const node: AllNodesI = {
+        id: v4(),
+        type,
+        position,
+        data: {
+          label: `${type.replaceAll("_"," ")}`,
+          description: "",
+          // parameters: {
+          //   path: v4(),
+          //   respondType: "IMMEDIATELY",
+          //   type: "GET",
+          // },
+          // settings: {
+          //   allowMultipleHttps: false,
+          //   notes: "",
+          // },
+        },
+      };
 
-        addNode(node);
-      }
+      addNode(node);
     },
     [reactFlowInstance, draftState]
   );
@@ -116,8 +113,7 @@ function EditorPage() {
 
   console.log({ draftState });
   return (
-    <TooltipProvider>
-      <Tooltip delayDuration={0}  >
+    <>
       <WorkflowDetailsHeader />
       <GlobalLayout className="p-0">
         <div style={{ height: "100%", position: "relative" }}>
@@ -149,8 +145,7 @@ function EditorPage() {
           </ReactFlow>
         </div>
       </GlobalLayout>
-      </Tooltip>
-    </TooltipProvider>
+    </>
   );
 }
 

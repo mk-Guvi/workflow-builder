@@ -10,7 +10,6 @@ import {
   NodeChange,
   ReactFlow,
   ReactFlowInstance,
-  
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { Button } from "@/components/ui/button";
@@ -22,6 +21,7 @@ import { AllNodesI, TNodeTypes } from "@/lib/types";
 import { toast } from "sonner";
 import CommonNode from "./components/CommonNode";
 import { useWorkflowStore } from "@/app/store";
+import { Tooltip, TooltipProvider } from "@/components/ui/tooltip";
 
 function EditorPage() {
   const { draftState, addNode, updateNodes } = useWorkflowStore();
@@ -45,7 +45,7 @@ function EditorPage() {
   const onDrop = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (event: any) => {
-      console.log("Im Here")
+      console.log("Im Here");
       event.preventDefault();
 
       const type: TNodeTypes = event.dataTransfer.getData(
@@ -82,18 +82,17 @@ function EditorPage() {
           position,
           data: {
             label: "Webhook Node",
-          description: "",
-          parameters: {
-            path: v4(),
-            respondType: "IMMEDIATELY",
-            type: "GET",
+            description: "",
+            parameters: {
+              path: v4(),
+              respondType: "IMMEDIATELY",
+              type: "GET",
+            },
+            settings: {
+              allowMultipleHttps: false,
+              notes: "",
+            },
           },
-          settings:{
-            allowMultipleHttps:false,
-            notes:""
-          }
-          },
-          
         };
 
         addNode(node);
@@ -115,9 +114,10 @@ function EditorPage() {
     event.dataTransfer.dropEffect = "move";
   }, []);
 
-console.log({draftState})
+  console.log({ draftState });
   return (
-    <>
+    <TooltipProvider>
+      <Tooltip delayDuration={0}  >
       <WorkflowDetailsHeader />
       <GlobalLayout className="p-0">
         <div style={{ height: "100%", position: "relative" }}>
@@ -137,12 +137,11 @@ console.log({draftState})
             onDragOver={onDragOver}
             onInit={setReactFlowInstance}
             nodes={draftState.nodes}
-            fitView
             edges={draftState.edges}
             nodeTypes={{
-              "WEBHOOK_NODE":CommonNode,
-              "WEBHOOK_RESPONSE_NODE":CommonNode,
-              "CODE_NODE":CommonNode
+              WEBHOOK_NODE: CommonNode,
+              WEBHOOK_RESPONSE_NODE: CommonNode,
+              CODE_NODE: CommonNode,
             }}
           >
             <Background />
@@ -150,7 +149,8 @@ console.log({draftState})
           </ReactFlow>
         </div>
       </GlobalLayout>
-    </>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
 

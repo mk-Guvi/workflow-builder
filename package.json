@@ -9,6 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@codemirror/autocomplete": "^6.18.4",
+    "@codemirror/commands": "^6.8.0",
+    "@codemirror/lang-javascript": "^6.2.2",
+    "@codemirror/view": "^6.36.2",
     "@hookform/resolvers": "^3.10.0",
     "@prisma/client": "^6.2.1",
     "@radix-ui/react-alert-dialog": "^1.1.4",
@@ -17,6 +21,7 @@
     "@radix-ui/react-separator": "^1.1.1",
     "@radix-ui/react-slot": "^1.1.1",
     "@radix-ui/react-tooltip": "^1.1.6",
+    "@uiw/react-codemirror": "^4.23.7",
     "@xyflow/react": "^12.3.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

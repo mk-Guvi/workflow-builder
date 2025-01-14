@@ -19,6 +19,7 @@ type StoreState = {
 type Store = StoreState & {
   update: (partialState: Partial<StoreState>) => void;
   addNode: (node: AllNodesI) => void;
+  deleteNode: (nodeId: string) => void;
   updateNodes: (nodes: AllNodesI[]) => void;
 };
 
@@ -42,6 +43,15 @@ export const useWorkflowStore = create<Store>((set) => ({
       draftState: {
         ...state.draftState,
         nodes,
+      },
+    })),
+
+  deleteNode: (nodeId: string) =>
+    set((state) => ({
+      ...state,
+      draftState: {
+        ...state.draftState,
+        nodes: state.draftState.nodes.filter((d) => d.id !== nodeId),
       },
     })),
   addNode: (node: AllNodesI) =>

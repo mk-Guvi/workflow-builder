@@ -119,10 +119,7 @@ const Workflowform = ({ workflow }: Props) => {
               <Button
                 variant={"outline"}
                 className="flex-1"
-                onClick={ ()=>{
-                  console.log("Im")
-                  setClose()
-                }}
+                onClick={setClose}
                 type="button"
                 disabled={isLoading}
               >

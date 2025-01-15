@@ -3,13 +3,14 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback,  useMemo, useState } from "react";
 import NodeDataView from "./NodeDataView";
 import { X, GripVertical } from "lucide-react";
 import { useDrawer } from "@/app/providers/drawerProvider";
-import { useWorkflowStore } from "@/app/store";
-import { Input } from "@/components/ui/input";
+
 import Header from "./Header";
+import NodeNameEditor from "./NodeNameEditor";
+import NodeSections from "./NodeSections";
 
 const CustomHandle = ({ disabled }: { disabled: boolean }) =>
   disabled ? null : (
@@ -25,18 +26,10 @@ const CustomHandle = ({ disabled }: { disabled: boolean }) =>
   );
 function NodesEditor() {
   const { setClose } = useDrawer();
-  const { selectedNode, draftState } = useWorkflowStore();
-  const [nodeName, setNodeName] = useState("");
   const [fullScreenView, setFullScreenView] = useState("");
 
-  useEffect(() => {
-    const findNode = draftState?.nodes?.find((d) => d?.id === selectedNode);
-    if (findNode) {
-      setNodeName(findNode?.data?.label || "");
-    }
-  }, [selectedNode, draftState]);
 
-  const seletedFullView = useMemo(() => {
+  const selectedFullView = useMemo(() => {
     return {
       OUTPUT: fullScreenView === "OUTPUT",
       NODE: fullScreenView === "NODE",
@@ -51,15 +44,9 @@ function NodesEditor() {
   return (
     <main className="flex h-full w-full flex-col gap-4 pt-3 overflow-y-auto">
       <header className="flex items-center gap-2 px-2  flex-wrap">
-        <p className="flex-1">
-          <Input
-            value={nodeName}
-            onChange={(e) => {
-              setNodeName(e.target.value);
-            }}
-            className="max-w-[15rem]"
-          />
-        </p>
+        <div className="flex-1">
+          <NodeNameEditor/>
+        </div>
         <X onClick={setClose} />
       </header>
       <div className="flex-1 w-full border rounded-md overflow-hidden">
@@ -68,47 +55,48 @@ function NodesEditor() {
             defaultSize={100}
             minSize={25}
             className={
-              fullScreenView && fullScreenView !== "INPUT" ? "hidden" : ""
+             `flex flex-col h-full w-full ${fullScreenView && fullScreenView !== "INPUT" ? "hidden" : ""}`
             }
           >
             <Header
               onChangeFullScreen={() => onChangeScreen("INPUT")}
               title="Input"
-              isFullScreen={seletedFullView.INPUT}
+              isFullScreen={selectedFullView.INPUT}
             >
               <div></div>
             </Header>
-            <NodeDataView data={""} />
+            <NodeDataView data={{}} />
           </ResizablePanel>
           <CustomHandle disabled={!!fullScreenView} />
           <ResizablePanel
             defaultSize={100}
             minSize={25}
             className={
-              fullScreenView && fullScreenView !== "NODE" ? "hidden" : ""
+                `flex flex-col h-full w-full ${fullScreenView && fullScreenView !== "NODE" ? "hidden" : ""}`
             }
           >
             <Header
               onChangeFullScreen={() => onChangeScreen("NODE")}
               title="Node"
-              isFullScreen={seletedFullView.NODE}
+              isFullScreen={selectedFullView.NODE}
             >
-              <div></div>
+            <></>
             </Header>
-            <NodeDataView data={""} />
+            <NodeSections/>
+            
           </ResizablePanel>
           <CustomHandle disabled={!!fullScreenView} />
           <ResizablePanel
             defaultSize={100}
             minSize={25}
             className={
-              fullScreenView && fullScreenView !== "OUTPUT" ? "hidden" : ""
+                `flex flex-col h-full w-full ${fullScreenView && fullScreenView !== "OUTPUT" ? "hidden" : ""}`
             }
           >
             <Header
               onChangeFullScreen={() => onChangeScreen("OUTPUT")}
               title="Output"
-              isFullScreen={seletedFullView.OUTPUT}
+              isFullScreen={selectedFullView.OUTPUT}
             >
               <div></div>
             </Header>

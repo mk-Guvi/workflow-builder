@@ -44,7 +44,6 @@ function EditorPage() {
   const onDrop = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (event: any) => {
-      console.log("Im Here");
       event.preventDefault();
 
       const type: TNodeTypes = event.dataTransfer.getData(
@@ -79,7 +78,7 @@ function EditorPage() {
         type,
         position,
         data: {
-          label: `${type.replaceAll("_"," ")}`,
+          label: `${type.replaceAll("_", " ")}`,
           description: "",
           // parameters: {
           //   path: v4(),

@@ -3,9 +3,12 @@ import { z } from "zod";
 import { Edge, Node } from "@xyflow/react";
 
 export const WorkflowFormSchema = z.object({
-  name: z.string().min(1, "Required"),
-  description: z.string().min(1, "Required"),
+  name: z.string().trim().min(1, "Required"),
+  description: z.string().trim().min(1, "Required"),
 });
+export const NodeNameSchema = z.object({
+  name: z.string().trim().min(1, 'Required'),
+})
 
 export type TNodeTypes = "WEBHOOK_NODE" | "CODE_NODE" | "WEBHOOK_RESPONSE_NODE";
 
@@ -106,3 +109,4 @@ export type GetWorkflowsResponse = {
     limit?: number;
   };
 };
+

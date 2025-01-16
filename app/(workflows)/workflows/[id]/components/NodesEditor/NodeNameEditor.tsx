@@ -7,7 +7,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { NodeNameSchema } from "@/lib/types";
+import { AllNodesI, NodeNameSchema } from "@/lib/types";
 
 import {
   Popover,
@@ -21,6 +21,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import NodeIconByType from "../IconsByNodeType";
 
 function NodeNameEditor() {
   const { selectedNode, draftState, update } = useWorkflowStore();
@@ -31,6 +32,7 @@ function NodeNameEditor() {
       name: "",
     },
   });
+  const [nodeData, setNodeData] = useState<AllNodesI|null>(null);
   const [initialName, setInitialName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [canEditName, setCanEditName] = useState(false);
@@ -40,6 +42,7 @@ function NodeNameEditor() {
     if (findNode) {
       form.setValue("name", (findNode?.data?.label || "")?.trim());
       setInitialName((findNode?.data?.label || "")?.trim());
+      setNodeData(findNode);
     }
   }, [selectedNode, draftState]);
 
@@ -119,7 +122,8 @@ function NodeNameEditor() {
       </PopoverContent>
 
       <div className="flex group items-center gap-2">
-        <p title={initialName} className="max-w-[20rem] truncate">
+        <NodeIconByType type={nodeData?.type||"WEBHOOK_NODE"} size={18}/>
+        <p title={initialName} className="max-w-[20rem] text-md tetx-gay-800 font-medium truncate">
           {initialName}
         </p>
 

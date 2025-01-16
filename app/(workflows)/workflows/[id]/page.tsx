@@ -4,15 +4,19 @@ import WorkflowDetailsHeader from "../../components/headers/workflowDetailsHeade
 import GlobalLayout from "@/components/globals/GlobalLayout";
 import { v4 } from "uuid";
 import {
+  addEdge,
+  applyEdgeChanges,
   applyNodeChanges,
   Background,
+  Connection,
   Controls,
+  Edge,
+  EdgeChange,
   NodeChange,
   ReactFlow,
   ReactFlowInstance,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { Button } from "@/components/ui/button";
 import { PlusSquare } from "lucide-react";
 import GlobalDrawer from "@/components/globals/GlobalDrawer";
 import NodesSidebar from "./components/NodesSidebar";
@@ -21,9 +25,10 @@ import { AllNodesI, TNodeTypes } from "@/lib/types";
 import { toast } from "sonner";
 import CommonNode from "./components/CommonNode";
 import { useWorkflowStore } from "@/app/store";
+import CustomEdge from "./components/CustomEdge";
 
 function EditorPage() {
-  const { draftState, addNode, updateNodes } = useWorkflowStore();
+  const { draftState, addNode, updateNodes, update } = useWorkflowStore();
   const { setOpen } = useDrawer();
 
   const [reactFlowInstance, setReactFlowInstance] =
@@ -111,27 +116,56 @@ function EditorPage() {
   }, []);
 
   console.log({ draftState });
+
+  const onEdgesChange = useCallback(
+    (changes: EdgeChange[]) => {
+      console.log({ changes });
+      update({
+        draftState: {
+          ...draftState,
+          edges: applyEdgeChanges(changes, draftState.edges),
+        },
+      });
+    },
+    [draftState]
+  );
+
+  const onConnect = useCallback(
+    (params: Edge | Connection) => {
+      update({
+        draftState: {
+          ...draftState,
+          edges: addEdge({...params,type:"default"}, draftState.edges),
+        },
+      });
+    },
+    [draftState]
+  );
   return (
     <>
       <WorkflowDetailsHeader />
       <GlobalLayout className="p-0">
         <div style={{ height: "100%", position: "relative" }}>
-          <Button
-            className="absolute top-2 right-4 z-50"
-            variant={"outline"}
+          <PlusSquare
+            size={40}
+            className="absolute rounded-lg cursor-pointer border shadow-md p-2 top-2 right-4 z-50"
             onClick={(e) => {
               e.stopPropagation();
               handleClick();
             }}
-          >
-            <PlusSquare />
-          </Button>
+          />
+
           <ReactFlow
+            onEdgesChange={onEdgesChange}
             onNodesChange={onNodesChange}
             onDrop={onDrop}
+            onConnect={onConnect}
             onDragOver={onDragOver}
             onInit={setReactFlowInstance}
             nodes={draftState.nodes}
+            edgeTypes={{
+              "default": CustomEdge,
+            }}
             edges={draftState.edges}
             nodeTypes={{
               WEBHOOK_NODE: CommonNode,

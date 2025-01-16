@@ -13,13 +13,13 @@ import {
 } from "@/components/ui/drawer";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useDrawer } from "@/app/providers/drawerProvider";
+import clsx from "clsx";
 
 type Props = {
   title?: string;
   subheading?: string;
   children: React.ReactNode;
   defaultOpen?: boolean;
-  position?: "right" | "left";
   modal?: boolean;
   hideHeader?: boolean;
 };
@@ -29,39 +29,24 @@ export default function DrawerComponent({
   defaultOpen,
   title,
   subheading,
-  position = "right",
-  modal = true,
   hideHeader = false,
+  modal = false,
 }: Props) {
   const { isOpen, setClose, isFullScreen } = useDrawer();
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const handleClose = () => setClose();
 
-  const renderHeader = () => {
-    if (hideHeader || (!title && !subheading)) return null;
-    
-    return (
-      <div className="flex justify-between items-center mb-2">
-        <div>
-          {title && (
-            <VaulDrawer.Title className="font-medium text-zinc-900">
-              {title}
-            </VaulDrawer.Title>
-          )}
-          {subheading && (
-            <VaulDrawer.Description className="text-zinc-600">
-              {subheading}
-            </VaulDrawer.Description>
-          )}
-        </div>
-      </div>
-    );
-  };
+  React.useEffect(() => {
+    window.requestAnimationFrame(() => {
+      document.body.style.pointerEvents = isOpen ? "auto" : "none";
+    });
+  }, [isOpen]);
+
 
   if (isDesktop) {
     return (
       <VaulDrawer.Root
-        direction={position}
+        direction={"right"}
         modal={modal}
         dismissible={false}
         defaultOpen={defaultOpen}
@@ -70,11 +55,10 @@ export default function DrawerComponent({
         <VaulDrawer.Portal>
           <VaulDrawer.Overlay className="fixed inset-0 bg-black/40" />
           <VaulDrawer.Content
-            className={`fixed z-[999] outline-none flex transition-all duration-300 ${
-              isFullScreen
-                ? "inset-2"
-                : `${position}-2 top-2 bottom-2 w-[310px]`
-            }`}
+            className={clsx(
+              "fixed z-[999] outline-none flex transition-all duration-300",
+              isFullScreen ? "inset-2" : `right-2 top-2 bottom-2 w-[310px]`
+            )}
             style={
               !isFullScreen
                 ? ({
@@ -84,8 +68,18 @@ export default function DrawerComponent({
             }
           >
             <div className="bg-zinc-50 h-full w-full grow p-5 flex overflow-auto flex-col rounded-[16px]">
-              {renderHeader()}
-              <div className={`flex-1 overflow-auto w-full h-full ${!hideHeader && (title || subheading) ? "" : "-mt-2"}`}>
+              <VaulDrawer.Title hidden={hideHeader} className="font-medium text-zinc-900">
+                {title}
+              </VaulDrawer.Title>
+              
+              <VaulDrawer.Description hidden={hideHeader} className="text-zinc-600">
+                {subheading}
+              </VaulDrawer.Description>
+
+              <div className={clsx(
+                "flex-1 overflow-auto w-full h-full",
+                !hideHeader && (title || subheading) ? "" : "-mt-2"
+              )}>
                 {children}
               </div>
             </div>
@@ -97,7 +91,7 @@ export default function DrawerComponent({
 
   return (
     <Drawer open={isOpen} onClose={handleClose} defaultOpen={defaultOpen}>
-      <DrawerContent className={isFullScreen ? "h-[95vh]" : ""}>
+      <DrawerContent className={clsx(isFullScreen && "h-[95vh]")}>
         {!hideHeader && (title || subheading) && (
           <DrawerHeader className="text-left">
             <div className="flex justify-between items-center">
@@ -108,7 +102,7 @@ export default function DrawerComponent({
             </div>
           </DrawerHeader>
         )}
-        <div className={`${!hideHeader && (title || subheading) ? "" : "mt-4"}`}>
+        <div className={clsx(!hideHeader && (title || subheading) ? "" : "mt-4")}>
           {children}
         </div>
         <DrawerFooter className="pt-2">

@@ -6,9 +6,12 @@ export const WorkflowFormSchema = z.object({
   name: z.string().trim().min(1, "Required"),
   description: z.string().trim().min(1, "Required"),
 });
+
 export const NodeNameSchema = z.object({
   name: z.string().trim().min(1, 'Required'),
 })
+
+
 
 export type TNodeTypes = "WEBHOOK_NODE" | "CODE_NODE" | "WEBHOOK_RESPONSE_NODE";
 
@@ -37,6 +40,7 @@ export interface CodeNodeDataI  {
       isEnabled: boolean;
       maxTries: number;
       waitBetweenTries: number;
+
     };
     onError: "STOP" | "CONTINUE";
     notes: string;
@@ -62,9 +66,9 @@ export interface WebhookResponseNodeDataI {
 
 export interface WebhookNodeDataI {
   parameters: {
-    type: "GET" | "POST";
+    method: "GET" | "POST";
     path: string;
-    respondType: "IMMEDIATELY" | "LAST_NODE" | "RESPONSE_WRBHOOOK";
+    respondType: "IMMEDIATELY" | "LAST_NODE" | "RESPONSE_WEBHOOK";
   };
   settings: {
     allowMultipleHttps: boolean;

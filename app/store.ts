@@ -1,4 +1,4 @@
-import { AllNodesI, LinkI, Workflow } from "@/lib/types";
+import { AllNodesDataI, AllNodesI, LinkI, Workflow } from "@/lib/types";
 import { create } from "zustand";
 
 type StoreState = {
@@ -9,10 +9,12 @@ type StoreState = {
   draftState: {
     edges: LinkI[];
     nodes: AllNodesI[];
+    nodesSettings:Record<string, AllNodesDataI>;
   };
   mainState: {
     edges: LinkI[];
     nodes: AllNodesI[];
+    nodesSettings:Record<string, AllNodesDataI>;
   };
 };
 
@@ -31,10 +33,12 @@ export const useWorkflowStore = create<Store>((set) => ({
   draftState: {
     edges: [],
     nodes: [],
+    nodesSettings:{},
   },
   mainState: {
     edges: [],
     nodes: [],
+    nodesSettings:{},
   },
   update: (partialState) => set((state) => ({ ...state, ...partialState })),
   updateNodes: (nodes: AllNodesI[]) =>

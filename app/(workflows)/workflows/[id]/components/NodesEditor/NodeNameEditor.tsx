@@ -7,7 +7,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { AllNodesI, NodeNameSchema } from "@/lib/types";
+import {  NodeNameSchema } from "@/lib/types";
 
 import {
   Popover,
@@ -22,6 +22,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import NodeIconByType from "../IconsByNodeType";
+import { useNodesEditor } from "./hooks";
 
 function NodeNameEditor() {
   const { selectedNode, draftState, update } = useWorkflowStore();
@@ -32,23 +33,20 @@ function NodeNameEditor() {
       name: "",
     },
   });
-  const [nodeData, setNodeData] = useState<AllNodesI|null>(null);
+  const { nodeData } = useNodesEditor();
   const [initialName, setInitialName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [canEditName, setCanEditName] = useState(false);
 
   useEffect(() => {
-    const findNode = draftState?.nodes?.find((d) => d?.id === selectedNode);
-    if (findNode) {
-      form.setValue("name", (findNode?.data?.label || "")?.trim());
-      setInitialName((findNode?.data?.label || "")?.trim());
-      setNodeData(findNode);
+    if (nodeData) {
+      form.setValue("name", (nodeData?.data?.label || "")?.trim());
+      setInitialName((nodeData?.data?.label || "")?.trim());
     }
-  }, [selectedNode, draftState]);
+  }, [nodeData]);
 
   const handleSubmit = async (values: z.infer<typeof NodeNameSchema>) => {
     setIsLoading(true);
-    // await onUpdate(values.name);
     setCanEditName(false);
     const findNode = draftState?.nodes?.find((d) => d?.id === selectedNode);
     if (findNode) {
@@ -67,7 +65,6 @@ function NodeNameEditor() {
     }
 
     setIsLoading(false);
-    
   };
 
   return (
@@ -84,7 +81,7 @@ function NodeNameEditor() {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-lg">Rename node</FormLabel>
+                  <FormLabel className="text-sm">Rename node</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="Name" />
                   </FormControl>
@@ -94,36 +91,39 @@ function NodeNameEditor() {
             />
 
             <div className="flex items-center justify-end gap-2">
-            <Button
-            size={"sm"}
-              disabled={isLoading}
-              type="button"
-              variant={"outline"}
-              onClick={() => {
-                form.setValue("name", initialName);
-                setCanEditName(false);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button size={"sm"} disabled={isLoading} type="submit">
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Renaming
-                </>
-              ) : (
-                "Rename"
-              )}
-            </Button>
+              <Button
+                size={"sm"}
+                disabled={isLoading}
+                type="button"
+                variant={"outline"}
+                onClick={() => {
+                  form.setValue("name", initialName);
+                  setCanEditName(false);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button size={"sm"} disabled={isLoading} type="submit">
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Renaming
+                  </>
+                ) : (
+                  "Rename"
+                )}
+              </Button>
             </div>
           </form>
         </Form>
       </PopoverContent>
 
       <div className="flex group items-center gap-2">
-        <NodeIconByType type={nodeData?.type||"WEBHOOK_NODE"} size={18}/>
-        <p title={initialName} className="max-w-[20rem] text-md tetx-gay-800 font-medium truncate">
+        <NodeIconByType type={nodeData?.type || "WEBHOOK_NODE"} size={18} />
+        <p
+          title={initialName}
+          className="max-w-[20rem] text-md tetx-gay-800 font-medium truncate"
+        >
           {initialName}
         </p>
 

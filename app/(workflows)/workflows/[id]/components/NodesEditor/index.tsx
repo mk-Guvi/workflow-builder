@@ -3,7 +3,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import React, { useCallback,  useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import NodeDataView from "./NodeDataView";
 import { X, GripVertical } from "lucide-react";
 import { useDrawer } from "@/app/providers/drawerProvider";
@@ -11,6 +11,7 @@ import { useDrawer } from "@/app/providers/drawerProvider";
 import Header from "./Header";
 import NodeNameEditor from "./NodeNameEditor";
 import NodeSections from "./NodeSections";
+import NodeInputDataView from "./NodeInputDataView";
 
 const CustomHandle = ({ disabled }: { disabled: boolean }) =>
   disabled ? null : (
@@ -28,7 +29,6 @@ function NodesEditor() {
   const { setClose } = useDrawer();
   const [fullScreenView, setFullScreenView] = useState("");
 
-
   const selectedFullView = useMemo(() => {
     return {
       OUTPUT: fullScreenView === "OUTPUT",
@@ -45,7 +45,7 @@ function NodesEditor() {
     <main className="flex h-full w-full flex-col gap-4 pt-3 overflow-y-auto">
       <header className="flex items-center gap-2 px-2  flex-wrap">
         <div className="flex-1">
-          <NodeNameEditor/>
+          <NodeNameEditor />
         </div>
         <X onClick={setClose} />
       </header>
@@ -54,52 +54,45 @@ function NodesEditor() {
           <ResizablePanel
             defaultSize={100}
             minSize={25}
-            className={
-             `flex flex-col h-full w-full ${fullScreenView && fullScreenView !== "INPUT" ? "hidden" : ""}`
-            }
+            className={`flex flex-col h-full w-full ${
+              fullScreenView && fullScreenView !== "INPUT" ? "hidden" : ""
+            }`}
           >
             <Header
               onChangeFullScreen={() => onChangeScreen("INPUT")}
               title="Input"
               isFullScreen={selectedFullView.INPUT}
-            >
-              <div></div>
-            </Header>
-            <NodeDataView data={{}} />
+            ></Header>
+            <NodeInputDataView />
           </ResizablePanel>
           <CustomHandle disabled={!!fullScreenView} />
           <ResizablePanel
             defaultSize={100}
             minSize={25}
-            className={
-                `flex flex-col h-full w-full ${fullScreenView && fullScreenView !== "NODE" ? "hidden" : ""}`
-            }
+            className={`flex flex-col h-full w-full ${
+              fullScreenView && fullScreenView !== "NODE" ? "hidden" : ""
+            }`}
           >
             <Header
               onChangeFullScreen={() => onChangeScreen("NODE")}
               title="Node"
               isFullScreen={selectedFullView.NODE}
-            >
-            <></>
-            </Header>
-            <NodeSections/>
-            
+            ></Header>
+            <NodeSections />
           </ResizablePanel>
           <CustomHandle disabled={!!fullScreenView} />
           <ResizablePanel
             defaultSize={100}
             minSize={25}
-            className={
-                `flex flex-col h-full w-full ${fullScreenView && fullScreenView !== "OUTPUT" ? "hidden" : ""}`
-            }
+            className={`flex flex-col h-full w-full ${
+              fullScreenView && fullScreenView !== "OUTPUT" ? "hidden" : ""
+            }`}
           >
             <Header
               onChangeFullScreen={() => onChangeScreen("OUTPUT")}
               title="Output"
               isFullScreen={selectedFullView.OUTPUT}
-            >
-              <div></div>
-            </Header>
+            ></Header>
             <NodeDataView data={""} />
           </ResizablePanel>
         </ResizablePanelGroup>

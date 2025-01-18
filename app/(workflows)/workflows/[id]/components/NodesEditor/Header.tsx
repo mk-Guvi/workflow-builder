@@ -3,7 +3,7 @@ import React from "react";
 
 type Props = {
   title: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   isFullScreen: boolean;
   onChangeFullScreen: () => void;
 };

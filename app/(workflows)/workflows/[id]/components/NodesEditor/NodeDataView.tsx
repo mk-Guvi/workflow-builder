@@ -6,15 +6,14 @@ type Props = {
   data: any;
 };
 
-function NodeDataView({data}: Props) {
-  const formattedJson=useMemo(()=>{
-    try{
-      return !data?'':JSON.parse(data)
-    }catch{
-     
-      return data
+function NodeDataView({ data }: Props) {
+  const formattedJson = useMemo(() => {
+    try {
+      return !data ? "" : JSON.parse(data);
+    } catch {
+      return data;
     }
-  },[data])
+  }, [data]);
 
   return (
     <div className="h-full w-full overflow-auto p-3">

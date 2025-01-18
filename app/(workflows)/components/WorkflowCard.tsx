@@ -3,6 +3,7 @@
 import {
   Card,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -25,7 +26,7 @@ type WorkflowCardProps = {
 export default function WorkflowCard({ workflow }: WorkflowCardProps) {
   const { setOpen } = useModal();
   const router = useRouter();
-  const { setOpen: setOpenModal,setClose } = useModal();
+  const { setOpen: setOpenModal, setClose } = useModal();
 
   const handleClick = () => {
     setOpen(
@@ -38,7 +39,7 @@ export default function WorkflowCard({ workflow }: WorkflowCardProps) {
     const response = await onDeleteWorkflow(workflow.id);
     if (!response?.error) {
       toast.message(response.message);
-      setClose()
+      setClose();
       router.refresh();
     } else {
       toast.error(response.message);
@@ -55,27 +56,33 @@ export default function WorkflowCard({ workflow }: WorkflowCardProps) {
   };
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader>
+    <Card className="h-full ">
+      <CardHeader className="">
         <CardTitle>{workflow.name}</CardTitle>
+        <CardDescription>{workflow.description}</CardDescription>
       </CardHeader>
-      <CardContent className="flex-grow">
-        <p className="text-sm text-gray-500 mb-2">
+      <CardContent className="">
+        <p className="text-sm text-gray-500">
           {new Date(workflow.updatedAt).toLocaleString()}
         </p>
-        <p className="text-sm">{workflow.description}</p>
       </CardContent>
       <CardFooter className="flex items-center gap-2 flex-wrap">
         <Link href={`/workflows/${workflow?.id}`} className="flex-1">
-          <Button variant={"outline"} className="w-full">
+          <Button size={"sm"} variant={"outline"} className="w-full">
             View Workflow
           </Button>
         </Link>
-        <Button variant={"default"} onClick={handleClick} className="w-fit">
+        <Button
+          size={"sm"}
+          variant={"default"}
+          onClick={handleClick}
+          className="w-fit"
+        >
           <EditIcon />
         </Button>
 
         <Button
+          size={"sm"}
           variant={"destructive"}
           onClick={handleDelete}
           className="w-fit"

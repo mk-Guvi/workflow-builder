@@ -50,6 +50,7 @@ export interface CodeNodeDataI  {
 export interface WebhookResponseNodeDataI {
   parameters: {
     respondWith: "TEXT" | "JSON";
+    respondValue: string;
     responseCode?: number;
     responseHeaders: { label: string; value: string }[];
   };

@@ -4,17 +4,19 @@ import React from "react";
 import { useNodesEditor } from "./hooks";
 import WebhookNodeParameter from "./ParamsAndSettings/WebhookNode/WebhookNodeParameter";
 import WebhookNodeSettings from "./ParamsAndSettings/WebhookNode/WebhookNodeSettings";
+import WebhookResponseNodeParameter from "./ParamsAndSettings/WebhookResponseNode/WebhookResponseNodeParameter";
+import WebhookResponseNodeSettings from "./ParamsAndSettings/WebhookResponseNode/WebhookResponseNodeSettings";
 
 const ParamsRenderer: Record<TNodeTypes, React.FC> = {
   WEBHOOK_NODE: WebhookNodeParameter,
   CODE_NODE: WebhookNodeParameter,
-  WEBHOOK_RESPONSE_NODE: WebhookNodeParameter,
+  WEBHOOK_RESPONSE_NODE: WebhookResponseNodeParameter,
 };
 
 const SettingsRenderer: Record<TNodeTypes, React.FC> = {
   WEBHOOK_NODE: WebhookNodeSettings,
   CODE_NODE: WebhookNodeSettings,
-  WEBHOOK_RESPONSE_NODE: WebhookNodeSettings,
+  WEBHOOK_RESPONSE_NODE: WebhookResponseNodeSettings,
 };
 
 function NodeSections() {

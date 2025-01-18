@@ -10,11 +10,12 @@ import {
   CompletionResult
 } from "@codemirror/autocomplete";
 import { cn } from "@/lib/utils";
+import { baseTheme } from "./CodeEditorStyle";
 
 interface CodeEditorProps {
   value: string;
   className?: string;
-  type?: "JS" | "JSON";
+  type?: "JS" | "JSON"|"TEXT";
   nodes?: string[];
   onChange: (value: string) => void;
   disabled?: boolean;
@@ -34,13 +35,16 @@ const isValidJSON = (str: string): boolean => {
 
 
 
-const getLanguageExtension = (type: 'JS' | 'JSON') => {
+const getLanguageExtension = (type: 'JS' | 'JSON' | 'TEXT') => {
   switch (type) {
+    case 'JS':
+      return javascript();
     case 'JSON':
       return javascript({ jsx: false, typescript: false });
-    case 'JS':
+    case 'TEXT':
+      return [];
     default:
-      return javascript({ jsx: true, typescript: true });
+      return javascript();
   }
 };
 
@@ -66,8 +70,8 @@ const nodeCompletions = (nodes: string[] = []) => {
     const methodMatch = context.matchBefore(/\$\(['"]\w+['"]\)\.(\w*)$/);
     if (methodMatch) {
       const methods = [
-        { label: 'item', info: 'Returns a single item' },
-        { label: 'all', info: 'Returns all items as array' }
+        { label: 'item',  },
+        { label: 'all',  }
       ];
 
       return {
@@ -75,7 +79,7 @@ const nodeCompletions = (nodes: string[] = []) => {
         options: methods.map(method => ({
           label: method.label,
           type: 'property',
-          info: method.info
+          
         }))
       };
     }
@@ -88,7 +92,7 @@ const nodeCompletions = (nodes: string[] = []) => {
         options: [{
           label: 'json',
           type: 'method',
-          info: 'Returns data as JSON'
+          
         }]
       };
     }
@@ -117,8 +121,10 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   const extensions = useMemo(() => [
     getLanguageExtension(type),
     keymap.of([...defaultKeymap, ...completionKeymap]),
+    baseTheme,
     autocompletion({
-      override: [nodeCompletions(nodes)]
+      override: [nodeCompletions(nodes)],
+      
     }),
     EditorView.lineWrapping,
     EditorView.theme({
@@ -157,9 +163,10 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
         extensions={extensions}
         onChange={handleChange}
         theme="light"
-        editable={!disabled}
+        editable={!disabled} 
         style={{ textAlign: 'left' }}
         basicSetup={{
+          
           lineNumbers: true,
           bracketMatching: true,
           closeBrackets: true,
@@ -168,7 +175,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
           indentOnInput: true,
         }}
       />
-      {type === 'JSON' && !isValidJSONValue && (
+      {type === 'JSON' && value && !isValidJSONValue && (
         <div className="text-sm text-red-500">
           Invalid JSON format
         </div>

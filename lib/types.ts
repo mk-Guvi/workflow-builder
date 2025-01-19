@@ -32,7 +32,7 @@ export interface AllNodesI extends Node {
 
 export interface CodeNodeDataI  {
   parameters: {
-    data: string;
+    code: string;
     type: "JS";
   };
   settings: {

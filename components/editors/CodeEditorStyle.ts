@@ -2,9 +2,9 @@ import { EditorView } from "@codemirror/view";
 
 export const baseTheme = EditorView.theme({
   "&": {
-    padding: "0",
-    fontSize: "14px",
-    lineHeight: "1.5",
+    padding: "0px",
+    fontSize: "13px",
+    lineHeight: "2",
     width: "100%",
     fontFamily: "inherit",
     border: "1px solid #e5e7eb",
@@ -20,7 +20,7 @@ export const baseTheme = EditorView.theme({
   },
   ".cm-content": {
     textAlign: "left",
-    padding: "0px",
+    padding: "0 0 0 6px",
     whiteSpace: "pre-wrap",
     wordBreak: "break-word",
   },
@@ -90,13 +90,15 @@ export const baseTheme = EditorView.theme({
     marginLeft: "8px",
   },
   ".cm-activeLine": {
-    backgroundColor: "#EEE0FF", // Tailwind's gray-100
+    backgroundColor: "#EEE0FF",
+    marginLeft: "-6px",
+    paddingLeft: "6px",
   },
   ".cm-activeLine .cm-gutter": {
-    backgroundColor: "#EEE0FF", // Tailwind's gray-100
+    backgroundColor: "#EEE0FF",
   },
   ".cm-lineNumbers .cm-gutterElement": {
-    color: "#6b7280", // Tailwind's gray-500 for line number text
+    color: "#6b7280",
     paddingLeft: "8px",
   },
   ".cm-editor": {
@@ -106,7 +108,7 @@ export const baseTheme = EditorView.theme({
     backgroundColor: "white",
   },
   ".cm-activeLineGutter": {
-    backgroundColor: "#EEE0FF", // Tailwind's gray-100
+    backgroundColor: "#EEE0FF",
   },
   ".cm-completionIcon.cm-completionIcon-variable": {
     display: "none !important",

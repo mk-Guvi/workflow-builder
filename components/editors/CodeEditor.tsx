@@ -130,12 +130,13 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
     EditorView.theme({
       "&": {
         textAlign: "left",
-        fontSize: "13px",
+        fontSize: "12px",
         fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace"
       },
       ".cm-content": {
         fontFamily: "inherit",
-        fontSize: "inherit"
+        fontSize: "inherit",
+        
       },
       ".cm-line": {
         fontFamily: "inherit",

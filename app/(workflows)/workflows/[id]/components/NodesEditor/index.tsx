@@ -74,9 +74,9 @@ function NodesEditor() {
             }`}
           >
             <Header
-              onChangeFullScreen={() => onChangeScreen("NODE")}
+              // onChangeFullScreen={() => onChangeScreen("NODE")}
               title="Node"
-              isFullScreen={selectedFullView.NODE}
+              // isFullScreen={selectedFullView.NODE}
             ></Header>
             <NodeSections />
           </ResizablePanel>

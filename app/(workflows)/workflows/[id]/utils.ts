@@ -39,3 +39,18 @@ export const WebhookResponseNodeSettingsSchema = z.object({
   onError: z.enum(["STOP", "CONTINUE"],{ required_error: "Required" }).default("STOP"),
   notes: z.string().trim(),
 })
+
+export const CodeNodeParamsSchema = z.object({
+  code: z.string().trim(),
+  type: z.enum(["JS"],{ required_error: "Required" }).default("JS"),
+});
+
+export const CodeNodeSettingsSchema = z.object({
+  retryOnFail: z.object({
+    isEnabled: z.boolean().default(false),
+    maxTries: z.number().min(1).default(1),
+    waitBetweenTries: z.number().min(1).default(1),
+  }),
+  onError: z.enum(["STOP", "CONTINUE"],{ required_error: "Required" }).default("STOP"),
+  notes: z.string().trim(),
+})

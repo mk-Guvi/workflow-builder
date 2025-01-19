@@ -6,16 +6,18 @@ import WebhookNodeParameter from "./ParamsAndSettings/WebhookNode/WebhookNodePar
 import WebhookNodeSettings from "./ParamsAndSettings/WebhookNode/WebhookNodeSettings";
 import WebhookResponseNodeParameter from "./ParamsAndSettings/WebhookResponseNode/WebhookResponseNodeParameter";
 import WebhookResponseNodeSettings from "./ParamsAndSettings/WebhookResponseNode/WebhookResponseNodeSettings";
+import CodeNodeParameter from "./ParamsAndSettings/CodeNode/CodeNodeParameter";
+import CodeNodeSettings from "./ParamsAndSettings/CodeNode/CodeNodeSettings";
 
 const ParamsRenderer: Record<TNodeTypes, React.FC> = {
   WEBHOOK_NODE: WebhookNodeParameter,
-  CODE_NODE: WebhookNodeParameter,
+  CODE_NODE: CodeNodeParameter,
   WEBHOOK_RESPONSE_NODE: WebhookResponseNodeParameter,
 };
 
 const SettingsRenderer: Record<TNodeTypes, React.FC> = {
   WEBHOOK_NODE: WebhookNodeSettings,
-  CODE_NODE: WebhookNodeSettings,
+  CODE_NODE: CodeNodeSettings,
   WEBHOOK_RESPONSE_NODE: WebhookResponseNodeSettings,
 };
 

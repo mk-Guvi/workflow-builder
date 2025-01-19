@@ -18,6 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useNodesEditor } from "./hooks";
 
 const frameworks = [
   {
@@ -45,6 +46,12 @@ const frameworks = [
 export function NodeSelector() {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
+  const { getPrevNodes } = useNodesEditor();
+
+  const updatedValue = React.useMemo(() => {
+    const findNode = getPrevNodes.find((each) => each.id === value);
+    return findNode?.data?.label || "Select node";
+  }, [value, getPrevNodes]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -55,9 +62,7 @@ export function NodeSelector() {
           aria-expanded={open}
           className="w-[200px] text-xs justify-between"
         >
-          {value
-            ? frameworks.find((framework) => framework.value === value)?.label
-            : "Select node"}
+          {updatedValue}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -67,11 +72,11 @@ export function NodeSelector() {
           <CommandList>
             <CommandEmpty>No Node found.</CommandEmpty>
             <CommandGroup>
-              {frameworks.map((framework) => (
+              {getPrevNodes.map((each) => (
                 <CommandItem
                   className="text-xs"
-                  key={framework.value}
-                  value={framework.value}
+                  key={each.id}
+                  value={each.id}
                   onSelect={(currentValue) => {
                     setValue(currentValue === value ? "" : currentValue);
                     setOpen(false);
@@ -80,10 +85,10 @@ export function NodeSelector() {
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      value === framework.value ? "opacity-100" : "opacity-0"
+                      value === each.id ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  {framework.label}
+                  {each.data.label}
                 </CommandItem>
               ))}
             </CommandGroup>

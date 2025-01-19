@@ -59,13 +59,13 @@ function EditorPage() {
       if (typeof type === "undefined" || !type) {
         return;
       }
-
+      let label = `${type.replaceAll("_", " ")}`;
       const triggerAlreadyExists = draftState.nodes.find(
-        (node) => node.type === "WEBHOOK_NODE"
+        (node) => ["WEBHOOK_NODE",'WEBHOOK_RESPONSE_NODE'].includes(type)&& node.type === type
       );
 
-      if (type === "WEBHOOK_NODE" && triggerAlreadyExists) {
-        toast("Only one Webhook can be added to automations at the moment");
+      if (triggerAlreadyExists) {
+        toast.error(`Only one ${label} node is allowed`,);
         return;
       }
 
@@ -77,13 +77,17 @@ function EditorPage() {
         x: event.clientX,
         y: event.clientY,
       });
-
+      const count = draftState.nodes.reduce((a, b) => a + (b.type === type ? 1 : 0), 0);
+      
+      if (count > 0) {
+        label = `${label} ${count + 1}`;
+      }
       const node: AllNodesI = {
         id: v4(),
         type,
         position,
         data: {
-          label: `${type.replaceAll("_", " ")}`,
+          label,
           description: "",
           // parameters: {
           //   path: v4(),

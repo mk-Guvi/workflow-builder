@@ -1,6 +1,6 @@
 import { useWorkflowStore } from "@/app/store";
 import { AllNodesDataI, AllNodesI } from "@/lib/types";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 export const useNodesEditor = () => {
   const [nodeData, setNodeData] = useState<AllNodesI | null>(null);
@@ -56,7 +56,41 @@ export const useNodesEditor = () => {
     [selectedNode, draftState, update]
   );
 
+  const getPrevNodes = useMemo(
+    (): AllNodesI[] => {
+      
+      const visited = new Set<string>();
+      const result: AllNodesI[] = [];
+  
+      // Recursive function to traverse parent nodes
+      const traverse = (nodeId: string) => {
+        // Prevent infinite loops by checking visited nodes
+        if (visited.has(nodeId)) return;
+        visited.add(nodeId);
+  
+        // Find all edges pointing to the current node
+        const incomingEdges = draftState.edges.filter((edge) => edge.target === nodeId);
+  
+        incomingEdges.forEach((edge) => {
+          // Find the source node for the current edge
+          const sourceNode = draftState.nodes.find((node) => node.id === edge.source);
+          if (sourceNode) {
+            result.push(sourceNode); // Add the source node to the result
+            traverse(sourceNode.id); // Recursively traverse its parents
+          }
+        });
+      };
+  
+      // Start traversal from the selected node
+      traverse(selectedNode);
+  
+      return result;
+    },
+    [draftState,selectedNode]
+  );
+
   return {
+    getPrevNodes,
     nodeData,
     updateNodeParams,
     updateNodeSettings,

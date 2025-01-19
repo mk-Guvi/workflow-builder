@@ -26,7 +26,7 @@ type Store = StoreState & {
 };
 
 export const useWorkflowStore = create<Store>((set) => ({
-  loading: false,
+  loading: true,
   error: "",
   selectedNode: "",
   workflowDetails: null,

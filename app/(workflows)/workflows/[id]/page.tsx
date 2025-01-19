@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import WorkflowDetailsHeader from "../../components/headers/workflowDetailsHeader";
 import GlobalLayout from "@/components/globals/GlobalLayout";
 import { v4 } from "uuid";
@@ -21,18 +21,55 @@ import { PlusSquare } from "lucide-react";
 import GlobalDrawer from "@/components/globals/GlobalDrawer";
 import NodesSidebar from "./components/NodesSidebar";
 import { useDrawer } from "@/app/providers/drawerProvider";
-import { AllNodesI, TNodeTypes } from "@/lib/types";
+import { AllNodesI, TNodeTypes, Workflow } from "@/lib/types";
 import { toast } from "sonner";
 import CommonNode from "./components/CommonNode";
 import { useWorkflowStore } from "@/app/store";
 import CustomEdge from "./components/CustomEdge";
+import { useParams, useRouter } from "next/navigation";
 
 function EditorPage() {
+  const router = useRouter();
   const { draftState, addNode, updateNodes, update } = useWorkflowStore();
+  const { id } = useParams();
   const { setOpen } = useDrawer();
 
   const [reactFlowInstance, setReactFlowInstance] =
     useState<ReactFlowInstance>();
+
+  const onInit = async () => {
+    try {
+      update({ loading: true });
+      const response = await fetch(`/api/workflows/${id}`);
+      const data = await response.json();
+      if (response?.status === 404) {
+        toast.error(data.message);
+        router.push("/workflows");
+        return;
+      } else if (response?.status === 200) {
+        update({
+          workflowDetails: data?.workflow,
+          draftState: {
+            edges: data?.workflow?.edges || [],
+            nodes: data?.workflow?.nodes || [],
+            nodesSettings: {},
+          },
+        });
+      } else {
+        toast.error(data?.message || "Something went wrong");
+      }
+    } catch (e) {
+      console.log(e);
+    } finally {
+      update({ loading: false });
+    }
+  };
+
+  useEffect(() => {
+    if (id) {
+      onInit();
+    }
+  }, [id]);
 
   const handleClick = () => {
     setOpen(
@@ -61,11 +98,13 @@ function EditorPage() {
       }
       let label = `${type.replaceAll("_", " ")}`;
       const triggerAlreadyExists = draftState.nodes.find(
-        (node) => ["WEBHOOK_NODE",'WEBHOOK_RESPONSE_NODE'].includes(type)&& node.type === type
+        (node) =>
+          ["WEBHOOK_NODE", "WEBHOOK_RESPONSE_NODE"].includes(type) &&
+          node.type === type
       );
 
       if (triggerAlreadyExists) {
-        toast.error(`Only one ${label} node is allowed`,);
+        toast.error(`Only one ${label} node is allowed`);
         return;
       }
 
@@ -77,8 +116,11 @@ function EditorPage() {
         x: event.clientX,
         y: event.clientY,
       });
-      const count = draftState.nodes.reduce((a, b) => a + (b.type === type ? 1 : 0), 0);
-      
+      const count = draftState.nodes.reduce(
+        (a, b) => a + (b.type === type ? 1 : 0),
+        0
+      );
+
       if (count > 0) {
         label = `${label} ${count + 1}`;
       }
@@ -139,7 +181,7 @@ function EditorPage() {
       update({
         draftState: {
           ...draftState,
-          edges: addEdge({...params,type:"default"}, draftState.edges),
+          edges: addEdge({ ...params, type: "default" }, draftState.edges),
         },
       });
     },
@@ -168,7 +210,7 @@ function EditorPage() {
             onInit={setReactFlowInstance}
             nodes={draftState.nodes}
             edgeTypes={{
-              "default": CustomEdge,
+              default: CustomEdge,
             }}
             edges={draftState.edges}
             nodeTypes={{

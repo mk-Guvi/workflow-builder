@@ -1,5 +1,5 @@
 import { CodeNodeDataI } from "@/lib/types";
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 
 import { useWorkflowStore } from "@/app/store";
 import { Form } from "@/components/ui/form";
@@ -46,6 +46,12 @@ function CodeNodeParameter() {
       code: params?.code || "",
     },
   });
+
+  useEffect(() => {
+    form.reset({
+      ...params,
+    });
+  }, [params]);
 
   const onSubmit = useCallback(
     (data: z.infer<typeof CodeNodeParamsSchema>) => {

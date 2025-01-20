@@ -1,5 +1,5 @@
 import { CodeNodeDataI,  } from "@/lib/types";
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 
 import { useWorkflowStore } from "@/app/store";
 import { Form } from "@/components/ui/form";
@@ -33,9 +33,15 @@ function CodeNodeSettings() {
       ...settings,
     },
   });
+  
+  useEffect(() => {
+    form.reset({
+      ...settings,
+    });
+  }, [settings]);
 
   const onSubmit = useCallback(
-    (data: z.infer<typeof WebhookResponseNodeSettingsSchema>) => {
+    (data: z.infer<typeof CodeNodeSettingsSchema>) => {
       if (selectedNode) {
         updateNodeSettings(data);
       }

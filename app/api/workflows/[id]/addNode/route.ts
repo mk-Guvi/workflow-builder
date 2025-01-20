@@ -85,15 +85,10 @@ export const POST = async (
               path: nodeId,
               respondType: "IMMEDIATELY",
             },
-            method: "GET",
-            path: nodeId,
-            respondType: "IMMEDIATELY",
             settings: {
               allowMultipleHttps: false,
               notes: "",
             },
-            allowMultipleHttps: false,
-            notes: "",
           };
         }
       } catch (webhookError) {

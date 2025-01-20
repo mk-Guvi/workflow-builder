@@ -27,10 +27,19 @@ import CommonNode from "./components/CommonNode";
 import { useWorkflowStore } from "@/app/store";
 import CustomEdge from "./components/CustomEdge";
 import { useParams, useRouter } from "next/navigation";
+import LoadingSpinner from "@/components/loaders/SpinnerLoader";
 
 function EditorPage() {
   const router = useRouter();
-  const { draftState, addNode, updateNodes, update } = useWorkflowStore();
+  const {
+    draftState,
+    addNode,
+    updateNodes,
+    update,
+    workflowDetails,
+    loading,
+    error,
+  } = useWorkflowStore();
   const { id } = useParams();
   const { setOpen } = useDrawer();
 
@@ -39,7 +48,7 @@ function EditorPage() {
 
   const onInit = async () => {
     try {
-      update({ loading: true });
+      update({ loading: true, error: "" });
       const response = await fetch(`/api/workflows/${id}`);
       const data = await response.json();
       if (response?.status === 404) {
@@ -60,6 +69,9 @@ function EditorPage() {
       }
     } catch (e) {
       console.log(e);
+      update({
+        error: "Something went wrong",
+      });
     } finally {
       update({ loading: false });
     }
@@ -172,8 +184,6 @@ function EditorPage() {
     event.dataTransfer.dropEffect = "move";
   }, []);
 
-  console.log({ draftState });
-
   const onEdgesChange = useCallback(
     (changes: EdgeChange[]) => {
       console.log({ changes });
@@ -201,16 +211,19 @@ function EditorPage() {
   return (
     <>
       <WorkflowDetailsHeader />
-      <GlobalLayout className="p-0">
+      <GlobalLayout className="!p-0">
         <div style={{ height: "100%", position: "relative" }}>
-          <PlusSquare
-            size={40}
-            className="absolute rounded-lg cursor-pointer border shadow-md p-2 top-2 right-4 z-50"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleClick();
-            }}
-          />
+          <LoadingSpinner isLoading={loading} />
+          {workflowDetails?.id && !error ? (
+            <PlusSquare
+              size={40}
+              className="absolute rounded-lg cursor-pointer border shadow-md p-2 top-2 right-4 z-50"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleClick();
+              }}
+            />
+          ) : null}
 
           <ReactFlow
             onEdgesChange={onEdgesChange}

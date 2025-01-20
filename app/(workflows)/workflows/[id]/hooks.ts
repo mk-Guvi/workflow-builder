@@ -13,6 +13,7 @@ export const useNodesEditor = () => {
     const findNode = draftState?.nodes?.find((d) => d?.id === selectedNode);
     if (findNode) {
       setNodeData(findNode);
+      
     }
   }, [selectedNode, draftState]);
 

@@ -10,9 +10,9 @@ export const onDragStart = (event: any, nodeType: TNodeTypes) => {
 
 
 export const WebhookNodeParamsSchema = z.object({
-  path: z.string().trim().regex(/^[a-zA-Z0-9]+$/).max(20,"Maximum 20 characters").min(6, "Required").refine((value) => {
-    const valid = /^[a-zA-Z0-9]+$/.test(value);
-    return valid ? value : "should only contain letters and numbers";
+  path: z.string().trim().regex(/^[a-zA-Z0-9-]+$/).max(50,"Maximum 50 characters").min(6, "Required").refine((value) => {
+    const valid = /^[a-zA-Z0-9-]+$/.test(value);
+    return valid ? value : "should only contain letters, numbers, and hyphens";
   }),
   method: z.enum(["GET", "POST",],{ required_error: "Required" }).default("GET"),
   respondType: z.enum(["IMMEDIATELY", "LAST_NODE", "RESPONSE_WEBHOOK"],{ required_error: "Required" }).default("IMMEDIATELY"),

@@ -1,5 +1,5 @@
 import { WebhookResponseNodeDataI } from "@/lib/types";
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 
 import { useWorkflowStore } from "@/app/store";
 import { Form } from "@/components/ui/form";
@@ -34,6 +34,13 @@ function WebhookResponseNodeSettings() {
     },
   });
 
+
+  useEffect(() => {
+    form.reset({
+      ...settings,
+    });
+  }, [settings]);
+  
   const onSubmit = useCallback(
     (data: z.infer<typeof WebhookResponseNodeSettingsSchema>) => {
       if (selectedNode) {

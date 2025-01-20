@@ -1,5 +1,5 @@
 import { WebhookNodeDataI } from "@/lib/types";
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 
 import { useWorkflowStore } from "@/app/store";
 import { Form } from "@/components/ui/form";
@@ -56,6 +56,12 @@ function WebhookNodeParameter() {
       respondType: params?.respondType || "IMMEDIATELY",
     },
   });
+
+  useEffect(() => {
+    form.reset({
+      ...params,
+    });
+  }, [params]);
 
   const onSubmit = useCallback(
     (data: z.infer<typeof WebhookNodeParamsSchema>) => {

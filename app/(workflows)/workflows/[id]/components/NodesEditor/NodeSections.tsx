@@ -1,5 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AllNodesDataI, TNodeTypes } from "@/lib/types";
+import { TNodeTypes } from "@/lib/types";
 import React, { useEffect } from "react";
 import { useNodesEditor } from "../../hooks";
 import WebhookNodeParameter from "./ParamsAndSettings/WebhookNode/WebhookNodeParameter";
@@ -38,7 +38,7 @@ function NodeSections() {
   });
 
   useEffect(() => {
-    if(nodeData?.id){
+    if (nodeData?.id) {
       if (draftState?.nodesSettings?.[nodeData?.id]) {
         setState({
           loading: false,
@@ -48,7 +48,6 @@ function NodeSections() {
         getNodeData();
       }
     }
-    
   }, [nodeData]);
 
   const getNodeData = async () => {
@@ -80,7 +79,6 @@ function NodeSections() {
           setState({
             loading: false,
             error: data?.message,
-            
           });
         } else {
           throw new Error("Something went wrong : Getting Node Data");
@@ -93,10 +91,9 @@ function NodeSections() {
         error: "Something went wrong",
       });
     }
-
   };
 
-console.log({state})
+  console.log({ state });
   return (
     <Tabs
       defaultValue="parameters"

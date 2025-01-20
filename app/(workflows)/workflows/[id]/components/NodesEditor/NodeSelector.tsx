@@ -20,28 +20,6 @@ import {
 } from "@/components/ui/popover";
 import { useNodesEditor } from "../../hooks";
 
-const frameworks = [
-  {
-    value: "next.js",
-    label: "Next.js",
-  },
-  {
-    value: "sveltekit",
-    label: "SvelteKit",
-  },
-  {
-    value: "nuxt.js",
-    label: "Nuxt.js",
-  },
-  {
-    value: "remix",
-    label: "Remix",
-  },
-  {
-    value: "astro",
-    label: "Astro",
-  },
-];
 
 export function NodeSelector() {
   const [open, setOpen] = React.useState(false);

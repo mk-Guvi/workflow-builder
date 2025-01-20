@@ -18,8 +18,9 @@ model workflows {
   is_deleted  Boolean         @default(false)
 
   // Relations
-  nodes workflowNodes[] @relation("workflowToNodes")
-  edges workflowEdges[] @relation("workflowToEdges")
+  nodes     workflowNodes[]  @relation("workflowToNodes")
+  edges     workflowEdges[]  @relation("workflowToEdges")
+  webhooks  webhooks[]      // Changed to simple one-to-many relation
 }
 
 model workflowNodes {
@@ -53,11 +54,30 @@ model workflowEdges {
   // Relations
   workflow    workflows       @relation("workflowToEdges", fields: [workflowId], references: [id])
   source      workflowNodes  @relation("SourceToEdge", fields: [sourceId], references: [id])
-  target      workflowNodes   @relation("TargetToEdge", fields: [targetId], references: [id])
+  target      workflowNodes  @relation("TargetToEdge", fields: [targetId], references: [id])
 }
 
 enum NodeType {
   WEBHOOK_NODE
   CODE_NODE
   WEBHOOK_RESPONSE_NODE
+}
+
+model webhooks {
+  id          String         @id @default(cuid())
+  path        String         @unique
+  workflowId  String
+  method     WebhookMethod
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  // Relations
+  workflow    workflows      @relation(fields: [workflowId], references: [id])
+}
+
+enum WebhookMethod {
+  GET
+  POST
+  PUT
+  DELETE
 }

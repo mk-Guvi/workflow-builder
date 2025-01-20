@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { useNodesEditor } from "../../hooks";
+import { useNodesEditor } from "../../../../hooks";
 import { CodeNodeParamsSchema } from "../../../../utils";
 import CodeEditor from "@/components/editors/CodeEditor";
 

@@ -18,7 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useNodesEditor } from "./hooks";
+import { useNodesEditor } from "../../hooks";
 
 const frameworks = [
   {

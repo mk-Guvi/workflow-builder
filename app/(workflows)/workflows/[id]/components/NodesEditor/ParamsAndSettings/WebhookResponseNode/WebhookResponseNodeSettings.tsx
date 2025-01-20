@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/form";
 
 import { Button } from "@/components/ui/button";
-import { useNodesEditor } from "../../hooks";
+import { useNodesEditor } from "../../../../hooks";
 import {  WebhookResponseNodeSettingsSchema } from "../../../../utils";
 import { Textarea } from "@/components/ui/textarea";
 

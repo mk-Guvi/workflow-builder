@@ -1,7 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {  TNodeTypes } from "@/lib/types";
 import React from "react";
-import { useNodesEditor } from "./hooks";
+import { useNodesEditor } from "../../hooks";
 import WebhookNodeParameter from "./ParamsAndSettings/WebhookNode/WebhookNodeParameter";
 import WebhookNodeSettings from "./ParamsAndSettings/WebhookNode/WebhookNodeSettings";
 import WebhookResponseNodeParameter from "./ParamsAndSettings/WebhookResponseNode/WebhookResponseNodeParameter";

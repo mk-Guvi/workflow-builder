@@ -1,21 +1,28 @@
 import { db } from "@/lib/db";
 
 export async function GET(
-  request: Request, 
+  request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
     const user_id = "1";
     const id = params.id;
 
-    if(!id) return Response.json({ error: "Workflow ID is required" }, { status: 400 })
+    if (!id)
+      return Response.json(
+        { error: "Workflow ID is required" },
+        { status: 400 }
+      );
 
     const workflow = await db.workflows.findFirst({
       where: { id, user_id, is_deleted: false },
     });
 
     if (!workflow) {
-      return Response.json({ error: true, message: "Workflow not found" }, { status: 404 });
+      return Response.json(
+        { error: true, message: "Workflow not found" },
+        { status: 404 }
+      );
     }
 
     const nodes = await db.workflowNodes.findMany({
@@ -31,19 +38,39 @@ export async function GET(
         color: true,
         description: true,
         createdAt: true,
-        updatedAt: true 
+        updatedAt: true,
         // Exclude 'data' by not including it here
       },
     });
-    
+
     const edges = await db.workflowEdges.findMany({
       where: { workflowId: id },
     });
 
-    return Response.json({ error: false, workflow, nodes, edges }, { status: 200 })
-
-  } catch(e) {
-    console.log(e)
-    return Response.json({ error: true, message: "Something went wrong" }, { status: 500 })
+    return Response.json(
+      {
+        error: false,
+        workflow,
+        nodes: nodes?.map(({ positionX, positionY, ...rest }) => ({
+          id: rest.id,
+          type: rest.type,
+          position: { x: positionX, y: positionY },
+          data:{
+            label: rest.label,
+            icon: rest.icon,
+            color: rest.color,
+            description: rest.description
+          }
+        })),
+        edges,
+      },
+      { status: 200 }
+    );
+  } catch (e) {
+    console.log(e);
+    return Response.json(
+      { error: true, message: "Something went wrong" },
+      { status: 500 }
+    );
   }
 }

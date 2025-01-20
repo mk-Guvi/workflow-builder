@@ -19,6 +19,7 @@ import { useWorkflowStore } from "@/app/store";
 import { useDrawer } from "@/app/providers/drawerProvider";
 import GlobalDrawer from "@/components/globals/GlobalDrawer";
 import NodesEditor from "./NodesEditor";
+import { useNodesEditor } from "../hooks";
 //import { useWorkflowStore } from "@/app/store";
 
 type CommonNodeProps = Pick<
@@ -27,8 +28,10 @@ type CommonNodeProps = Pick<
 >;
 
 const CommonNode = ({ type, data, selected, dragging }: CommonNodeProps) => {
-  const { deleteNode, update } = useWorkflowStore();
+  const { update } = useWorkflowStore();
+  const { onDeleteNode } = useNodesEditor();
   const { setOpen, setFullScreen } = useDrawer();
+  const [deleting, setDeleting] = React.useState(false);
   const nodeId = useNodeId();
 
   const logo = useMemo(() => {
@@ -51,6 +54,20 @@ const CommonNode = ({ type, data, selected, dragging }: CommonNodeProps) => {
       </GlobalDrawer>
     );
   };
+
+  const onDelete = async (e: {
+    stopPropagation: () => void;
+    preventDefault: () => void;
+  }) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (!deleting) {
+      setDeleting(true);
+      await onDeleteNode(`${nodeId}`);
+      setDeleting(false);
+    }
+  };
+
   return (
     <TooltipProvider>
       <Tooltip delayDuration={0}>
@@ -62,11 +79,7 @@ const CommonNode = ({ type, data, selected, dragging }: CommonNodeProps) => {
             <Trash2Icon
               size={16}
               className="cursor-pointer hover:text-gray-700"
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                deleteNode(`${nodeId}`);
-              }}
+              onClick={onDelete}
             />
           </TooltipContent>
           {type !== "WEBHOOK_NODE" && (
@@ -76,17 +89,11 @@ const CommonNode = ({ type, data, selected, dragging }: CommonNodeProps) => {
           <div
             onClick={(e) => {
               e.stopPropagation();
-              onOpen();
-              // const val = draftState.nodes.find((n) => n.id === nodeId);
-              // if (val)
-              // dispatch({
-              //   type: "SELECTED_ELEMENT",
-              //   payload: {
-              //     element: val,
-              //   },
-              // });
+              if (!deleting) {
+                onOpen();
+              }
             }}
-            className="w-fit p-2"
+            className="w-fit relative p-2"
           >
             <div className="flex flex-row items-center gap-1">
               <div>{logo}</div>
@@ -99,8 +106,13 @@ const CommonNode = ({ type, data, selected, dragging }: CommonNodeProps) => {
               className={clsx("absolute left-1 top-1 h-1 w-1 rounded-full", {
                 "bg-green-500": selected,
                 "bg-orange-500": dragging,
+                "bg-red-500": deleting,
               })}
-            ></div>
+            >
+              {deleting ? (
+                <span className="animate-ping absolute h-1 w-1 left-0 rounded-full bg-red-400 opacity-75"></span>
+              ) : null}
+            </div>
           </div>
 
           <CustomHandle type="source" position={Position.Right} />

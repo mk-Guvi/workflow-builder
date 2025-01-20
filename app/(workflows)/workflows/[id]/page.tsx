@@ -50,8 +50,8 @@ function EditorPage() {
         update({
           workflowDetails: data?.workflow,
           draftState: {
-            edges: data?.workflow?.edges || [],
-            nodes: data?.workflow?.nodes || [],
+            edges: data?.edges || [],
+            nodes: data?.nodes || [],
             nodesSettings: {},
           },
         });
@@ -85,65 +85,76 @@ function EditorPage() {
 
   const onDrop = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (event: any) => {
+    async (event: any) => {
       event.preventDefault();
+      try {
+        const type: TNodeTypes = event.dataTransfer.getData(
+          "application/reactflow"
+        );
 
-      const type: TNodeTypes = event.dataTransfer.getData(
-        "application/reactflow"
-      );
+        // check if the dropped element is valid
+        if (typeof type === "undefined" || !type) {
+          return;
+        }
+        let label = `${type.replaceAll("_", " ")}`;
+        const triggerAlreadyExists = draftState.nodes.find(
+          (node) =>
+            ["WEBHOOK_NODE", "WEBHOOK_RESPONSE_NODE"].includes(type) &&
+            node.type === type
+        );
 
-      // check if the dropped element is valid
-      if (typeof type === "undefined" || !type) {
-        return;
+        if (triggerAlreadyExists) {
+          toast.error(`Only one ${label} node is allowed`);
+          return;
+        }
+
+        // reactFlowInstance.project was renamed to reactFlowInstance.screenToFlowPosition
+        // and you don't need to subtract the reactFlowBounds.left/top anymore
+        // details: https://reactflow.dev/whats-new/2023-11-10
+        if (!reactFlowInstance) return;
+        const position = reactFlowInstance.screenToFlowPosition({
+          x: event.clientX,
+          y: event.clientY,
+        });
+        const count = draftState.nodes.reduce(
+          (a, b) => a + (b.type === type ? 1 : 0),
+          0
+        );
+
+        if (count > 0) {
+          label = `${label} ${count + 1}`;
+        }
+        const response = await fetch(`/api/workflows/${id}/addNode`, {
+          method: "POST",
+          body: JSON.stringify({
+            label,
+            description: "",
+            type,
+            positionX: position.x,
+            positionY: position.y,
+          }),
+        });
+
+        const json = await response.json();
+        if (json?.error === false) {
+          const node: AllNodesI = {
+            id: json.node.id,
+            type,
+            position,
+            data: {
+              label,
+              description: "",
+            },
+          };
+
+          addNode(node);
+        } else {
+          throw new Error(json.message || "Failed to add node");
+        }
+      } catch (e) {
+        console.log(e);
+        toast.error("Failed to add node");
       }
-      let label = `${type.replaceAll("_", " ")}`;
-      const triggerAlreadyExists = draftState.nodes.find(
-        (node) =>
-          ["WEBHOOK_NODE", "WEBHOOK_RESPONSE_NODE"].includes(type) &&
-          node.type === type
-      );
-
-      if (triggerAlreadyExists) {
-        toast.error(`Only one ${label} node is allowed`);
-        return;
-      }
-
-      // reactFlowInstance.project was renamed to reactFlowInstance.screenToFlowPosition
-      // and you don't need to subtract the reactFlowBounds.left/top anymore
-      // details: https://reactflow.dev/whats-new/2023-11-10
-      if (!reactFlowInstance) return;
-      const position = reactFlowInstance.screenToFlowPosition({
-        x: event.clientX,
-        y: event.clientY,
-      });
-      const count = draftState.nodes.reduce(
-        (a, b) => a + (b.type === type ? 1 : 0),
-        0
-      );
-
-      if (count > 0) {
-        label = `${label} ${count + 1}`;
-      }
-      const node: AllNodesI = {
-        id: v4(),
-        type,
-        position,
-        data: {
-          label,
-          description: "",
-          // parameters: {
-          //   path: v4(),
-          //   respondType: "IMMEDIATELY",
-          //   type: "GET",
-          // },
-          // settings: {
-          //   allowMultipleHttps: false,
-          //   notes: "",
-          // },
-        },
-      };
-
-      addNode(node);
     },
     [reactFlowInstance, draftState]
   );

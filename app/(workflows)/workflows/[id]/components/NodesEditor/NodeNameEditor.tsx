@@ -22,7 +22,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import NodeIconByType from "../IconsByNodeType";
-import { useNodesEditor } from "./hooks";
+import { useNodesEditor } from "../../hooks";
 
 function NodeNameEditor() {
   const { selectedNode, draftState, update } = useWorkflowStore();

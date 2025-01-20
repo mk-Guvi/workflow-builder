@@ -16,7 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { WebhookNodeSettingsSchema } from "@/app/(workflows)/workflows/[id]/utils";
 
 import { Button } from "@/components/ui/button";
-import { useNodesEditor } from "../../hooks";
+import { useNodesEditor } from "../../../../hooks";
 import { Textarea } from "@/components/ui/textarea";
 
 function WebhookNodeSettings() {

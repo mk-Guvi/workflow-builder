@@ -16,20 +16,20 @@ function NodesSidebar() {
   const {setClose}=useDrawer()
   return (
     <div className="h-full  w-full flex flex-col gap-3 overflow-auto">
-      <div className="flex-1 flex flex-col gap-4 overflow-auto">
+      <div className="flex-1 flex flex-col gap-4  mt-5 overflow-auto">
       {nodesList.map((each) => {
         return (
           <Card
-            key={each.value}
+            key={each.value}            
             draggable
             className="w-full cursor-grab border-black rounded-lg bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-900"
             onDragStart={(event) => onDragStart(event, each.value)}
           >
-            <CardHeader className="flex flex-row items-center gap-4 p-4">
+            <CardHeader className="flex flex-row items-center gap-4 p-2 px-4">
               <NodeIconByType type={each.value} />
               <CardTitle className="text-md">
                 {each.label}
-                <CardDescription>{each.description}</CardDescription>
+                <CardDescription className="text-xs">{each.description}</CardDescription>
               </CardTitle>
             </CardHeader>
           </Card>

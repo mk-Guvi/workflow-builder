@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { useNodesEditor } from "../../hooks";
+import { useNodesEditor } from "../../../../hooks";
 import { WebhookResponseNodeParamsSchema } from "../../../../utils";
 import { X } from "lucide-react";
 import CodeEditor from "@/components/editors/CodeEditor";

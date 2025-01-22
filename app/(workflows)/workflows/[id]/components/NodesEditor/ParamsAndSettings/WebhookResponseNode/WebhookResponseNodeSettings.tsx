@@ -1,5 +1,5 @@
 import { WebhookResponseNodeDataI } from "@/lib/types";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback } from "react";
 
 import { useWorkflowStore } from "@/app/store";
 import { Form } from "@/components/ui/form";
@@ -21,21 +21,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { useDrawer } from "@/app/providers/drawerProvider";
 
 function WebhookResponseNodeSettings() {
-  const { draftState, selectedNode } = useWorkflowStore();
+  const { nodesData, selectedNode } = useWorkflowStore();
   const { updateNodeSettings } = useNodesEditor();
-  const settings = draftState?.nodesSettings[selectedNode]
+  const settings = nodesData?.[selectedNode]
     ?.settings as WebhookResponseNodeDataI["settings"];
   const { isDisabled, setIsDisabled } = useDrawer();
   const form = useForm<z.infer<typeof WebhookResponseNodeSettingsSchema>>({
     mode: "onChange",
     resolver: zodResolver(WebhookResponseNodeSettingsSchema),
     defaultValues: {
-      ...settings,
-    },
-  });
-
-  useEffect(() => {
-    form.reset({
       notes: settings?.notes || "",
       onError: settings?.onError || "STOP",
       retryOnFail: {
@@ -43,8 +37,8 @@ function WebhookResponseNodeSettings() {
         maxTries: settings?.retryOnFail?.maxTries || 1,
         waitBetweenTries: settings?.retryOnFail?.waitBetweenTries || 1000,
       },
-    });
-  }, [settings]);
+    },
+  });
 
   const onSubmit = useCallback(
     async (data: z.infer<typeof WebhookResponseNodeSettingsSchema>) => {

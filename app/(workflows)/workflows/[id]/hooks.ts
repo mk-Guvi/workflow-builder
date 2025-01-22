@@ -6,8 +6,15 @@ import { toast } from "sonner";
 export const useNodesEditor = () => {
   const [nodeData, setNodeData] = useState<AllNodesI | null>(null);
 
-  const { selectedNode, draftState, update, deleteNode, workflowDetails } =
-    useWorkflowStore();
+  const {
+    selectedNode,
+    draftState,
+    nodesData,
+    updateNodeData,
+    update,
+    deleteNode,
+    workflowDetails,
+  } = useWorkflowStore();
 
   useEffect(() => {
     const findNode = draftState?.nodes?.find((d) => d?.id === selectedNode);
@@ -20,14 +27,14 @@ export const useNodesEditor = () => {
     async (payload: AllNodesDataI["parameters"]) => {
       try {
         const response = await fetch(
-          `/api/workflows/${workflowDetails?.id}/updateNode`,
+          `/api/workflows/${workflowDetails?.id}/updateNodeData`,
           {
             method: "PUT",
             body: JSON.stringify({
               nodeId: selectedNode,
               data: {
                 parameters: payload,
-                settings: draftState.nodesSettings[selectedNode]?.settings,
+                settings: nodesData?.[selectedNode]?.settings,
               },
             }),
           }
@@ -35,21 +42,14 @@ export const useNodesEditor = () => {
         const data = await response.json();
         if (data?.error === false) {
           toast.success("Node parameters updated successfully");
-          update({
-            draftState: {
-              ...draftState,
-              nodesSettings: {
-                ...draftState?.nodesSettings,
-                [selectedNode]: {
-                  ...draftState.nodesSettings[selectedNode],
-                  parameters: {
-                    ...draftState.nodesSettings[selectedNode]?.parameters,
-                    ...payload,
-                  },
-                } as AllNodesDataI,
-              },
+          updateNodeData(selectedNode, {
+            ...nodesData?.[selectedNode],
+            parameters: {
+              ...nodesData?.[selectedNode]?.parameters,
+              ...payload,
             },
-          });
+          } as AllNodesDataI);
+
           return true;
         } else {
           if (data?.message) {
@@ -72,14 +72,14 @@ export const useNodesEditor = () => {
     async (payload: Partial<AllNodesDataI["settings"]>) => {
       try {
         const response = await fetch(
-          `/api/workflows/${workflowDetails?.id}/updateNode`,
+          `/api/workflows/${workflowDetails?.id}/updateNodeData`,
           {
             method: "PUT",
             body: JSON.stringify({
               nodeId: selectedNode,
               data: {
                 settings: payload,
-                parameters: draftState.nodesSettings[selectedNode]?.parameters,
+                parameters: nodesData?.[selectedNode]?.parameters,
               },
             }),
           }
@@ -88,21 +88,14 @@ export const useNodesEditor = () => {
         const data = await response.json();
         if (data?.error === false) {
           toast.success("Node settings updated successfully");
-          update({
-            draftState: {
-              ...draftState,
-              nodesSettings: {
-                ...draftState?.nodesSettings,
-                [selectedNode]: {
-                  ...draftState.nodesSettings[selectedNode],
-                  settings: {
-                    ...draftState.nodesSettings[selectedNode]?.settings,
-                    ...payload,
-                  },
-                } as AllNodesDataI,
-              },
+          updateNodeData(selectedNode, {
+            ...nodesData?.[selectedNode],
+            settings: {
+              ...nodesData?.[selectedNode]?.settings,
+              ...payload,
             },
-          });
+          } as AllNodesDataI);
+
           return true;
         } else {
           if (data?.message) {

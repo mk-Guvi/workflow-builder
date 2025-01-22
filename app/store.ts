@@ -2,19 +2,19 @@ import { AllNodesDataI, AllNodesI, LinkI, Workflow } from "@/lib/types";
 import { create } from "zustand";
 
 type StoreState = {
+  showSave: boolean;
   loading: boolean;
   error: string;
   selectedNode: string;
   workflowDetails: Workflow | null;
+  nodesData: Record<string, AllNodesDataI>;
   draftState: {
     edges: LinkI[];
     nodes: AllNodesI[];
-    nodesSettings:Record<string, AllNodesDataI>;
   };
   mainState: {
     edges: LinkI[];
     nodes: AllNodesI[];
-    nodesSettings:Record<string, AllNodesDataI>;
   };
 };
 
@@ -23,24 +23,33 @@ type Store = StoreState & {
   addNode: (node: AllNodesI) => void;
   deleteNode: (nodeId: string) => void;
   updateNodes: (nodes: AllNodesI[]) => void;
+  updateNodeData: (nodeId: string, data: AllNodesDataI) => void;
 };
 
 export const useWorkflowStore = create<Store>((set) => ({
+  showSave: false,
   loading: true,
   error: "",
   selectedNode: "",
   workflowDetails: null,
+  nodesData: {},
   draftState: {
     edges: [],
     nodes: [],
-    nodesSettings:{},
   },
   mainState: {
     edges: [],
     nodes: [],
-    nodesSettings:{},
   },
   update: (partialState) => set((state) => ({ ...state, ...partialState })),
+  updateNodeData: (nodeId, data) =>
+    set((state) => ({
+      ...state,
+      nodesData: {
+        ...state.nodesData,
+        [nodeId]: data,
+      },
+    })),
   updateNodes: (nodes: AllNodesI[]) =>
     set((state) => ({
       ...state,

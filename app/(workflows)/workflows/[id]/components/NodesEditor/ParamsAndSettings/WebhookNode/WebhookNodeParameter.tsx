@@ -1,5 +1,5 @@
 import { WebhookNodeDataI } from "@/lib/types";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback } from "react";
 
 import { useWorkflowStore } from "@/app/store";
 import { Form } from "@/components/ui/form";
@@ -43,10 +43,10 @@ const respondTypeOptions = [
 ];
 
 function WebhookNodeParameter() {
-  const { draftState, selectedNode } = useWorkflowStore();
+  const { nodesData, selectedNode } = useWorkflowStore();
   const { updateNodeParams } = useNodesEditor();
   const { setIsDisabled ,isDisabled} = useDrawer();
-  const params = draftState?.nodesSettings[selectedNode]
+  const params = nodesData?.[selectedNode]
     ?.parameters as WebhookNodeDataI["parameters"];
 
   const form = useForm<z.infer<typeof WebhookNodeParamsSchema>>({
@@ -59,11 +59,7 @@ function WebhookNodeParameter() {
     },
   });
 
-  useEffect(() => {
-    form.reset({
-      ...params,
-    });
-  }, [params]);
+
 
   const onSubmit = useCallback(
     async (data: z.infer<typeof WebhookNodeParamsSchema>) => {

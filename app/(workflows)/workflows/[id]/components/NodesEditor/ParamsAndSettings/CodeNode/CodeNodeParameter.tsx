@@ -1,5 +1,5 @@
 import { CodeNodeDataI } from "@/lib/types";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback,  } from "react";
 
 import { useWorkflowStore } from "@/app/store";
 import { Form } from "@/components/ui/form";
@@ -34,10 +34,10 @@ const typeOptions = [
 ];
 
 function CodeNodeParameter() {
-  const { draftState, selectedNode } = useWorkflowStore();
+  const { nodesData, selectedNode } = useWorkflowStore();
   const { updateNodeParams } = useNodesEditor();
   const { setIsDisabled ,isDisabled} = useDrawer();
-  const params = draftState?.nodesSettings[selectedNode]
+  const params = nodesData?.[selectedNode]
     ?.parameters as CodeNodeDataI["parameters"];
 
   const form = useForm<z.infer<typeof CodeNodeParamsSchema>>({
@@ -49,11 +49,6 @@ function CodeNodeParameter() {
     },
   });
 
-  useEffect(() => {
-    form.reset({
-      ...params,
-    });
-  }, [params]);
 
   const onSubmit = useCallback(
     async (data: z.infer<typeof CodeNodeParamsSchema>) => {

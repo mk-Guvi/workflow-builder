@@ -1,8 +1,7 @@
 "use client";
 import React, { useCallback, useEffect, useState } from "react";
-import WorkflowDetailsHeader from "../../components/headers/workflowDetailsHeader";
+import WorkflowDetailsHeader from "./components/workflowDetailsHeader";
 import GlobalLayout from "@/components/globals/GlobalLayout";
-import { v4 } from "uuid";
 import {
   addEdge,
   applyEdgeChanges,
@@ -21,13 +20,14 @@ import { PlusSquare } from "lucide-react";
 import GlobalDrawer from "@/components/globals/GlobalDrawer";
 import NodesSidebar from "./components/NodesSidebar";
 import { useDrawer } from "@/app/providers/drawerProvider";
-import { AllNodesI, TNodeTypes, Workflow } from "@/lib/types";
+import { AllNodesI, TNodeTypes } from "@/lib/types";
 import { toast } from "sonner";
 import CommonNode from "./components/CommonNode";
 import { useWorkflowStore } from "@/app/store";
 import CustomEdge from "./components/CustomEdge";
 import { useParams, useRouter } from "next/navigation";
 import LoadingSpinner from "@/components/loaders/SpinnerLoader";
+
 
 function EditorPage() {
   const router = useRouter();
@@ -40,9 +40,10 @@ function EditorPage() {
     loading,
     error,
   } = useWorkflowStore();
+  
   const { id } = useParams();
   const { setOpen } = useDrawer();
-
+console.log({draftState})
   const [reactFlowInstance, setReactFlowInstance] =
     useState<ReactFlowInstance>();
 
@@ -58,10 +59,13 @@ function EditorPage() {
       } else if (response?.status === 200) {
         update({
           workflowDetails: data?.workflow,
+          mainState: {
+            edges: data?.edges || [],
+            nodes: data?.nodes || [],
+          },
           draftState: {
             edges: data?.edges || [],
             nodes: data?.nodes || [],
-            nodesSettings: {},
           },
         });
       } else {
@@ -173,6 +177,10 @@ function EditorPage() {
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
+      update({
+        showSave:true
+      })
+      console.log("Im here")
       updateNodes(applyNodeChanges(changes, draftState.nodes) as AllNodesI[]);
     },
     [draftState.nodes]
@@ -186,7 +194,9 @@ function EditorPage() {
 
   const onEdgesChange = useCallback(
     (changes: EdgeChange[]) => {
-      console.log({ changes });
+      update({
+        showSave:true
+      })
       update({
         draftState: {
           ...draftState,
@@ -200,6 +210,9 @@ function EditorPage() {
   const onConnect = useCallback(
     (params: Edge | Connection) => {
       update({
+        showSave:true
+      })
+      update({
         draftState: {
           ...draftState,
           edges: addEdge({ ...params, type: "default" }, draftState.edges),
@@ -208,6 +221,7 @@ function EditorPage() {
     },
     [draftState]
   );
+
   return (
     <>
       <WorkflowDetailsHeader />

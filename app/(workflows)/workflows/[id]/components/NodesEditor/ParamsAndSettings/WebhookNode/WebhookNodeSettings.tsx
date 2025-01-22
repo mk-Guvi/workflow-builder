@@ -1,5 +1,5 @@
 import { WebhookNodeDataI } from "@/lib/types";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback } from "react";
 
 import { useWorkflowStore } from "@/app/store";
 import {
@@ -21,10 +21,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { useDrawer } from "@/app/providers/drawerProvider";
 
 function WebhookNodeSettings() {
-  const { draftState, selectedNode } = useWorkflowStore();
+  const { nodesData, selectedNode } = useWorkflowStore();
   const { updateNodeSettings } = useNodesEditor();
-  const { setIsDisabled ,isDisabled} = useDrawer();
-  const settings = draftState?.nodesSettings[selectedNode]
+  const { setIsDisabled, isDisabled } = useDrawer();
+  const settings = nodesData?.[selectedNode]
     ?.settings as WebhookNodeDataI["settings"];
 
   const form = useForm<z.infer<typeof WebhookNodeSettingsSchema>>({
@@ -34,13 +34,6 @@ function WebhookNodeSettings() {
       notes: settings?.notes || "",
     },
   });
-
-
-  useEffect(() => {
-    form.reset({
-      notes: settings?.notes || "",
-    });
-  }, [settings]);
 
   const onSubmit = useCallback(
     async (data: z.infer<typeof WebhookNodeSettingsSchema>) => {
@@ -54,7 +47,7 @@ function WebhookNodeSettings() {
     },
     [selectedNode, updateNodeSettings]
   );
-  
+
   return (
     <Form {...form}>
       <form
@@ -80,7 +73,12 @@ function WebhookNodeSettings() {
             )}
           />
         </div>
-        <Button type="submit" disabled={isDisabled} size={"sm"} className="mt-2">
+        <Button
+          type="submit"
+          disabled={isDisabled}
+          size={"sm"}
+          className="mt-2"
+        >
           Save Settings
         </Button>
       </form>

@@ -25,7 +25,8 @@ const SettingsRenderer: Record<TNodeTypes, React.FC> = {
 
 function NodeSections() {
   const { nodeData } = useNodesEditor();
-  const { draftState, update, workflowDetails } = useWorkflowStore();
+  const { nodesData, updateNodeData, workflowDetails } =
+    useWorkflowStore();
   const ParamsView = (nodeData?.type && ParamsRenderer[nodeData?.type]) || null;
   const SettingsView =
     (nodeData?.type && SettingsRenderer[nodeData?.type]) || null;
@@ -39,7 +40,7 @@ function NodeSections() {
 
   useEffect(() => {
     if (nodeData?.id) {
-      if (draftState?.nodesSettings?.[nodeData?.id]) {
+      if (nodesData?.[nodeData?.id]) {
         setState({
           loading: false,
           error: "",
@@ -65,14 +66,8 @@ function NodeSections() {
           loading: false,
           error: "",
         });
-        update({
-          draftState: {
-            ...draftState,
-            nodesSettings: {
-              ...draftState?.nodesSettings,
-              [`${nodeData?.id}`]: data?.data,
-            },
-          },
+        updateNodeData(`${nodeData?.id}`, {
+          ...data?.data,
         });
       } else {
         if (data?.message) {
@@ -93,7 +88,6 @@ function NodeSections() {
     }
   };
 
-  
   return (
     <Tabs
       defaultValue="parameters"
@@ -112,8 +106,8 @@ function NodeSections() {
           <div className="flex items-center justify-center h-full text-red-500 font-bold text-center">
             {state.error}{" "}
           </div>
-        ) : (
-          state?.loading ? null : ParamsView && <ParamsView />
+        ) : state?.loading ? null : (
+          ParamsView && <ParamsView />
         )}
       </TabsContent>
       <TabsContent value="settings" className="w-full p-3 flex-1 overflow-auto">
@@ -121,8 +115,8 @@ function NodeSections() {
           <div className="flex items-center justify-center h-full text-red-500 font-bold text-center">
             {state.error}{" "}
           </div>
-        ) : (
-          state?.loading ? null : SettingsView && <SettingsView />
+        ) : state?.loading ? null : (
+          SettingsView && <SettingsView />
         )}
       </TabsContent>
     </Tabs>

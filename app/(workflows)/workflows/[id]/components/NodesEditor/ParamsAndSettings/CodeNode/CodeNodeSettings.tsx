@@ -1,5 +1,5 @@
 import { CodeNodeDataI } from "@/lib/types";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback } from "react";
 
 import { useWorkflowStore } from "@/app/store";
 import { Form } from "@/components/ui/form";
@@ -21,22 +21,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { useDrawer } from "@/app/providers/drawerProvider";
 
 function CodeNodeSettings() {
-  const { draftState, selectedNode } = useWorkflowStore();
+  const { nodesData, selectedNode } = useWorkflowStore();
   const { updateNodeSettings } = useNodesEditor();
-  const { setIsDisabled ,isDisabled} = useDrawer();
-  const settings = draftState?.nodesSettings[selectedNode]
+  const { setIsDisabled, isDisabled } = useDrawer();
+  const settings = nodesData?.[selectedNode]
     ?.settings as CodeNodeDataI["settings"];
 
   const form = useForm<z.infer<typeof CodeNodeSettingsSchema>>({
     mode: "onChange",
     resolver: zodResolver(CodeNodeSettingsSchema),
     defaultValues: {
-      ...settings,
-    },
-  });
-
-  useEffect(() => {
-    form.reset({
       notes: settings?.notes || "",
       onError: settings?.onError || "STOP",
       retryOnFail: {
@@ -44,8 +38,8 @@ function CodeNodeSettings() {
         maxTries: settings?.retryOnFail?.maxTries || 1,
         waitBetweenTries: settings?.retryOnFail?.waitBetweenTries || 1000,
       },
-    });
-  }, [settings]);
+    },
+  });
 
   const onSubmit = useCallback(
     async (data: z.infer<typeof CodeNodeSettingsSchema>) => {

@@ -10,7 +10,7 @@ export default async function WorkflowGrid() {
     return (
       <div className="text-center p-4">
         <p className="text-red-500 mb-4">Error: {error}</p>
-        <Link href={"/"}>
+        <Link href={"/"} >
         <Button>Retry</Button>
         </Link>
       </div>

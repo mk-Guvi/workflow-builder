@@ -7,7 +7,7 @@ interface ModalProviderProps {
   children: React.ReactNode;
 }
 
-export type ModalData = Record<string,any>
+export type ModalData = Record<string, any>;
 
 type ModalContextType = {
   data: ModalData;
@@ -34,14 +34,15 @@ const ModalProvider: React.FC<ModalProviderProps> = ({ children }) => {
   }, []);
 
   const setOpen = async (
-    modal: React.ReactNode,
+    Drawer: React.ReactNode,
     fetchData?: () => Promise<any>
   ) => {
-    if (modal) {
+    if (Drawer) {
       if (fetchData) {
-        setData({ ...data, ...(await fetchData()) } || {});
+        const fetchedData = await fetchData();
+        setData({ ...data, ...(fetchedData || {}) });
       }
-      setShowingModal(modal);
+      setShowingModal(Drawer);
       setIsOpen(true);
     }
   };
@@ -54,7 +55,7 @@ const ModalProvider: React.FC<ModalProviderProps> = ({ children }) => {
   if (!isMounted) return null;
 
   return (
-    <ModalContext.Provider value={{ data, setOpen, setClose, isOpen ,}}>
+    <ModalContext.Provider value={{ data, setOpen, setClose, isOpen }}>
       {children}
       {showingModal}
     </ModalContext.Provider>

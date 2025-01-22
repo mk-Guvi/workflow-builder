@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { AllNodesDataI } from "@/lib/types";
 import { NextRequest } from "next/server";
 
 export async function GET(
@@ -52,7 +53,7 @@ export async function GET(
     }
 
     // Parse the node data
-    let data: any = null;
+    let data: AllNodesDataI|null = null;
     try {
       if (node.data) {
         data = JSON.parse(node.data as string);

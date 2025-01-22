@@ -14,20 +14,16 @@ interface DeleteRequestParams {
   };
 }
 
-interface DeleteRequestBody {
-  nodeId: string;
-}
-
 export const DELETE = async (req: Request, { params }: DeleteRequestParams) => {
   const user_id = "1";
   const id = params.id;
 
   try {
-    const { nodeId } = (await req.json()) as DeleteRequestBody;
+    const { nodeId } = await req.json();
 
-    if (!id) {
+    if (!id || !nodeId) {
       return Response.json(
-        { error: "Workflow ID is required" },
+        { error: "Workflow ID and Node ID are required" },
         { status: 400 }
       );
     }
@@ -42,7 +38,7 @@ export const DELETE = async (req: Request, { params }: DeleteRequestParams) => {
         { status: 404 }
       );
     }
-
+console.log({nodeId})
     const node = await db.workflowNodes.findFirst({
       where: { id: nodeId },
     });
@@ -64,9 +60,7 @@ export const DELETE = async (req: Request, { params }: DeleteRequestParams) => {
       if (nodeData?.parameters?.method && nodeData?.parameters?.path) {
         await db.webhooks.delete({
           where: {
-            workflowId: id,
-            path: nodeData.parameters.path,
-            method: (nodeData.parameters.method||"GET") as "GET" | "POST",
+            nodeId
           },
         });
       }

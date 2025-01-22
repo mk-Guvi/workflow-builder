@@ -13,48 +13,109 @@ export const useNodesEditor = () => {
     const findNode = draftState?.nodes?.find((d) => d?.id === selectedNode);
     if (findNode) {
       setNodeData(findNode);
-      
     }
   }, [selectedNode, draftState]);
 
   const updateNodeParams = useCallback(
-    (payload: Partial<AllNodesDataI["parameters"]>) => {
-      update({
-        draftState: {
-          ...draftState,
-          nodesSettings: {
-            ...draftState?.nodesSettings,
-            [selectedNode]: {
-              ...draftState.nodesSettings[selectedNode],
-              parameters: {
-                ...draftState.nodesSettings[selectedNode]?.parameters,
-                ...payload,
+    async (payload: AllNodesDataI["parameters"]) => {
+      try {
+        const response = await fetch(
+          `/api/workflows/${workflowDetails?.id}/updateNode`,
+          {
+            method: "PUT",
+            body: JSON.stringify({
+              nodeId: selectedNode,
+              data: {
+                parameters: payload,
+                settings: draftState.nodesSettings[selectedNode]?.settings,
               },
-            } as AllNodesDataI,
-          },
-        },
-      });
+            }),
+          }
+        );
+        const data = await response.json();
+        if (data?.error === false) {
+          toast.success("Node parameters updated successfully");
+          update({
+            draftState: {
+              ...draftState,
+              nodesSettings: {
+                ...draftState?.nodesSettings,
+                [selectedNode]: {
+                  ...draftState.nodesSettings[selectedNode],
+                  parameters: {
+                    ...draftState.nodesSettings[selectedNode]?.parameters,
+                    ...payload,
+                  },
+                } as AllNodesDataI,
+              },
+            },
+          });
+          return true;
+        } else {
+          if (data?.message) {
+            toast.error(data?.message);
+            return false;
+          } else {
+            throw new Error("Failed to update node");
+          }
+        }
+      } catch (e) {
+        console.log(e);
+        toast.error("Something went wrong");
+        return false;
+      }
     },
     [selectedNode, draftState, update]
   );
 
   const updateNodeSettings = useCallback(
-    (payload: Partial<AllNodesDataI["settings"]>) => {
-      update({
-        draftState: {
-          ...draftState,
-          nodesSettings: {
-            ...draftState.nodesSettings,
-            [selectedNode]: {
-              ...draftState.nodesSettings[selectedNode],
-              settings: {
-                ...draftState.nodesSettings[selectedNode]?.settings,
-                ...payload,
+    async (payload: Partial<AllNodesDataI["settings"]>) => {
+      try {
+        const response = await fetch(
+          `/api/workflows/${workflowDetails?.id}/updateNode`,
+          {
+            method: "PUT",
+            body: JSON.stringify({
+              nodeId: selectedNode,
+              data: {
+                settings: payload,
+                parameters: draftState.nodesSettings[selectedNode]?.parameters,
               },
-            } as AllNodesDataI,
-          },
-        },
-      });
+            }),
+          }
+        );
+
+        const data = await response.json();
+        if (data?.error === false) {
+          toast.success("Node settings updated successfully");
+          update({
+            draftState: {
+              ...draftState,
+              nodesSettings: {
+                ...draftState?.nodesSettings,
+                [selectedNode]: {
+                  ...draftState.nodesSettings[selectedNode],
+                  settings: {
+                    ...draftState.nodesSettings[selectedNode]?.settings,
+                    ...payload,
+                  },
+                } as AllNodesDataI,
+              },
+            },
+          });
+          return true;
+        } else {
+          if (data?.message) {
+            toast.error(data?.message);
+            return false;
+          } else {
+            throw new Error("Failed to update node settings");
+          }
+        }
+      } catch (e) {
+        console.log(e);
+        return false;
+      }
     },
     [selectedNode, draftState, update]
   );

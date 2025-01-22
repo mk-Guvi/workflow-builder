@@ -18,10 +18,12 @@ import { WebhookNodeSettingsSchema } from "@/app/(workflows)/workflows/[id]/util
 import { Button } from "@/components/ui/button";
 import { useNodesEditor } from "../../../../hooks";
 import { Textarea } from "@/components/ui/textarea";
+import { useDrawer } from "@/app/providers/drawerProvider";
 
 function WebhookNodeSettings() {
   const { draftState, selectedNode } = useWorkflowStore();
   const { updateNodeSettings } = useNodesEditor();
+  const { setIsDisabled ,isDisabled} = useDrawer();
   const settings = draftState?.nodesSettings[selectedNode]
     ?.settings as WebhookNodeDataI["settings"];
 
@@ -29,7 +31,6 @@ function WebhookNodeSettings() {
     mode: "onChange",
     resolver: zodResolver(WebhookNodeSettingsSchema),
     defaultValues: {
-      allowMultipleHttps: settings?.allowMultipleHttps || false,
       notes: settings?.notes || "",
     },
   });
@@ -37,22 +38,23 @@ function WebhookNodeSettings() {
 
   useEffect(() => {
     form.reset({
-      ...settings,
+      notes: settings?.notes || "",
     });
   }, [settings]);
 
   const onSubmit = useCallback(
-    (data: z.infer<typeof WebhookNodeSettingsSchema>) => {
+    async (data: z.infer<typeof WebhookNodeSettingsSchema>) => {
       if (selectedNode) {
-        updateNodeSettings({
-          allowMultipleHttps: data.allowMultipleHttps,
-          notes: data.notes,
+        setIsDisabled(true);
+        await updateNodeSettings({
+          ...data,
         });
+        setIsDisabled(false);
       }
     },
     [selectedNode, updateNodeSettings]
   );
-
+  
   return (
     <Form {...form}>
       <form
@@ -78,7 +80,7 @@ function WebhookNodeSettings() {
             )}
           />
         </div>
-        <Button type="submit" size={"sm"} className="mt-2">
+        <Button type="submit" disabled={isDisabled} size={"sm"} className="mt-2">
           Save Settings
         </Button>
       </form>

@@ -19,7 +19,6 @@ export const WebhookNodeParamsSchema = z.object({
 });
 
 export const WebhookNodeSettingsSchema = z.object({
-  allowMultipleHttps: z.boolean().default(false),
   notes: z.string().trim(),
 });
 

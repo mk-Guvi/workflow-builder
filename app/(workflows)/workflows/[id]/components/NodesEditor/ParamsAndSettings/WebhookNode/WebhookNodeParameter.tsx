@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useNodesEditor } from "../../../../hooks";
+import { useDrawer } from "@/app/providers/drawerProvider";
 
 const methodOptions = ["GET", "POST"];
 const respondTypeOptions = [
@@ -44,11 +45,12 @@ const respondTypeOptions = [
 function WebhookNodeParameter() {
   const { draftState, selectedNode } = useWorkflowStore();
   const { updateNodeParams } = useNodesEditor();
+  const { setIsDisabled ,isDisabled} = useDrawer();
   const params = draftState?.nodesSettings[selectedNode]
     ?.parameters as WebhookNodeDataI["parameters"];
 
   const form = useForm<z.infer<typeof WebhookNodeParamsSchema>>({
-    mode: "onChange",
+    mode: "all",
     resolver: zodResolver(WebhookNodeParamsSchema),
     defaultValues: {
       path: params?.path || "",
@@ -64,17 +66,18 @@ function WebhookNodeParameter() {
   }, [params]);
 
   const onSubmit = useCallback(
-    (data: z.infer<typeof WebhookNodeParamsSchema>) => {
+    async (data: z.infer<typeof WebhookNodeParamsSchema>) => {
       if (selectedNode) {
-        updateNodeParams({
-          path: data.path,
-          method: data.method,
-          respondType: data.respondType,
+        setIsDisabled(true);
+        await updateNodeParams({
+         ...data,
         });
+        setIsDisabled(false);
       }
     },
     [selectedNode, updateNodeParams]
   );
+
 
   return (
     <Form {...form}>
@@ -89,69 +92,87 @@ function WebhookNodeParameter() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-sm">Path</FormLabel>
-              <FormControl>
-                <Input className="text-xs" placeholder="Enter Path" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="method"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-sm">Method</FormLabel>
-              <FormControl>
-                <Select
-                  
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <SelectTrigger>
-                    <SelectValue className="text-xs" placeholder="Select Method" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {methodOptions.map((method) => (
-                      <SelectItem className="text-xs" key={method} value={method}>
-                        {method}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="respondType"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-sm">Respond Type</FormLabel>
-              <FormControl>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <SelectTrigger>
-                    <SelectValue className="text-xs" placeholder="Select Respond Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {respondTypeOptions.map((type) => (
-                      <SelectItem className="text-xs" key={type.value} value={type.value}>
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        /></div>
-        <Button type="submit" size={"sm"} className="mt-2">
+                <FormControl>
+                  <Input
+                    className="text-xs"
+                    placeholder="Enter Path"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="method"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm">Method</FormLabel>
+                <FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        className="text-xs"
+                        placeholder="Select Method"
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {methodOptions.map((method) => (
+                        <SelectItem
+                          className="text-xs"
+                          key={method}
+                          value={method}
+                        >
+                          {method}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="respondType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm">Respond Type</FormLabel>
+                <FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        className="text-xs"
+                        placeholder="Select Respond Type"
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {respondTypeOptions.map((type) => (
+                        <SelectItem
+                          className="text-xs"
+                          key={type.value}
+                          value={type.value}
+                        >
+                          {type.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        <Button type="submit" disabled={isDisabled} size={"sm"} className="mt-2">
           Save Settings
         </Button>
       </form>

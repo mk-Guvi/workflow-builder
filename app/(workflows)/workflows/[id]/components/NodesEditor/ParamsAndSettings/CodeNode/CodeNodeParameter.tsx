@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { useNodesEditor } from "../../../../hooks";
 import { CodeNodeParamsSchema } from "../../../../utils";
 import CodeEditor from "@/components/editors/CodeEditor";
+import { useDrawer } from "@/app/providers/drawerProvider";
 
 const typeOptions = [
   {
@@ -35,6 +36,7 @@ const typeOptions = [
 function CodeNodeParameter() {
   const { draftState, selectedNode } = useWorkflowStore();
   const { updateNodeParams } = useNodesEditor();
+  const { setIsDisabled ,isDisabled} = useDrawer();
   const params = draftState?.nodesSettings[selectedNode]
     ?.parameters as CodeNodeDataI["parameters"];
 
@@ -54,12 +56,14 @@ function CodeNodeParameter() {
   }, [params]);
 
   const onSubmit = useCallback(
-    (data: z.infer<typeof CodeNodeParamsSchema>) => {
+    async (data: z.infer<typeof CodeNodeParamsSchema>) => {
       if (selectedNode) {
-        updateNodeParams({
+        setIsDisabled(true);
+        await updateNodeParams({
           type: data.type,
           code: data.code,
         });
+        setIsDisabled(false);
       }
     },
     [selectedNode, updateNodeParams]
@@ -126,7 +130,7 @@ function CodeNodeParameter() {
             )}
           />
         </div>
-        <Button type="submit" size="sm" className="mt-2">
+        <Button type="submit" disabled={isDisabled} size="sm" className="mt-2">
           Save Parameters
         </Button>
       </form>

@@ -93,7 +93,7 @@ function NodeSections() {
     }
   };
 
-  console.log({ state });
+  
   return (
     <Tabs
       defaultValue="parameters"
@@ -113,7 +113,7 @@ function NodeSections() {
             {state.error}{" "}
           </div>
         ) : (
-          ParamsView && <ParamsView />
+          state?.loading ? null : ParamsView && <ParamsView />
         )}
       </TabsContent>
       <TabsContent value="settings" className="w-full p-3 flex-1 overflow-auto">
@@ -122,7 +122,7 @@ function NodeSections() {
             {state.error}{" "}
           </div>
         ) : (
-          SettingsView && <SettingsView />
+          state?.loading ? null : SettingsView && <SettingsView />
         )}
       </TabsContent>
     </Tabs>

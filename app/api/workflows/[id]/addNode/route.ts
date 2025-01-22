@@ -6,7 +6,6 @@ export const POST = async (
   { params }: { params: { id: string } }
 ) => {
   try {
-    // Verify db is correctly imported and initialized
     if (!db) {
       console.error("Database client is not initialized");
       return Response.json(
@@ -45,22 +44,56 @@ export const POST = async (
 
     const nodeId = v4();
     let nodeData = {};
+
+    // First create the node
+    if (type === "WEBHOOK_NODE") {
+      const webhookPath = v4(); // Generate a unique path for the webhook
+      nodeData = {
+        parameters: {
+          method: "GET",
+          path: webhookPath,
+          respondType: "IMMEDIATELY",
+        },
+        settings: {
+          allowMultipleHttps: false,
+          notes: "",
+        },
+      };
+    }
+
+    // Create the node first
+    const node = await db.workflowNodes.create({
+      data: {
+        id: nodeId,
+        workflowId: params.id,
+        type,
+        positionX,
+        positionY,
+        data: JSON.stringify(nodeData),
+        label,
+      },
+    });
+
+    // Then create the webhook if it's a webhook node
     if (type === "WEBHOOK_NODE") {
       try {
-        // First verify the webhooks table exists
-        const webhook = await db.webhooks
-          .findFirst({
-            where: { workflowId: params.id, path: nodeId },
-          })
-          .catch((e) => {
-            console.error("Error querying webhook:", e);
-            return null;
-          });
+        // Check if webhook already exists
+        const webhook = await db.webhooks.findFirst({
+          where: {
+            workflowId: params.id,
+            path: nodeId,
+          },
+        });
 
         if (webhook) {
+          // If webhook exists, delete the node we just created
+          await db.workflowNodes.delete({
+            where: { id: nodeId },
+          });
+
           return Response.json(
             {
-              message: "Webhook node already exists",
+              message: "Webhook path already exists",
               error: true,
             },
             { status: 400 }
@@ -68,30 +101,20 @@ export const POST = async (
         }
 
         // Create new webhook
-        const newWebhook = await db.webhooks.create({
+        await db.webhooks.create({
           data: {
             path: nodeId,
+            nodeId: node.id,
             workflowId: params.id,
             method: "GET",
           },
         });
-
-        if (!newWebhook?.id) {
-          throw new Error("Failed to create webhook");
-        } else {
-          nodeData = {
-            parameters: {
-              method: "GET",
-              path: nodeId,
-              respondType: "IMMEDIATELY",
-            },
-            settings: {
-              allowMultipleHttps: false,
-              notes: "",
-            },
-          };
-        }
       } catch (webhookError) {
+        // If webhook creation fails, delete the node we created
+        await db.workflowNodes.delete({
+          where: { id: nodeId },
+        });
+
         console.error("Webhook creation error:", webhookError);
         return Response.json(
           {
@@ -102,17 +125,6 @@ export const POST = async (
         );
       }
     }
-
-    const node = await db.workflowNodes.create({
-      data: {
-        workflowId: params.id,
-        type,
-        positionX,
-        positionY,
-        data: JSON.stringify(nodeData),
-        label,
-      },
-    });
 
     return Response.json(
       {

@@ -26,6 +26,7 @@ import { useNodesEditor } from "../../../../hooks";
 import { WebhookResponseNodeParamsSchema } from "../../../../utils";
 import { X } from "lucide-react";
 import CodeEditor from "@/components/editors/CodeEditor";
+import { useDrawer } from "@/app/providers/drawerProvider";
 
 const respondTypeOptions = [
   {
@@ -41,6 +42,7 @@ const respondTypeOptions = [
 function WebhookResponseNodeParameter() {
   const { draftState, selectedNode } = useWorkflowStore();
   const { updateNodeParams } = useNodesEditor();
+  const { setIsDisabled, isDisabled } = useDrawer();
   const params = draftState?.nodesSettings[selectedNode]
     ?.parameters as WebhookResponseNodeDataI["parameters"];
 
@@ -49,33 +51,34 @@ function WebhookResponseNodeParameter() {
     resolver: zodResolver(WebhookResponseNodeParamsSchema),
     defaultValues: {
       respondWith: params?.respondWith || "TEXT",
+      responseValue: params?.responseValue || "",
       responseCode: params?.responseCode,
       responseHeaders: params?.responseHeaders || [],
     },
   });
-
 
   useEffect(() => {
     form.reset({
       ...params,
     });
   }, [params]);
-  
+
   const onSubmit = useCallback(
-    (data: z.infer<typeof WebhookResponseNodeParamsSchema>) => {
+    async (data: z.infer<typeof WebhookResponseNodeParamsSchema>) => {
+      
       if (selectedNode) {
-        updateNodeParams({
-          respondWith: data.respondWith,
-          responseCode: data.responseCode,
-          responseHeaders: data.responseHeaders,
+        setIsDisabled(true);
+        await updateNodeParams({
+          ...data,
         });
+        setIsDisabled(false);
       }
     },
     [selectedNode, updateNodeParams]
   );
 
   const onAddHeader = () => {
-    const currentHeaders = form.getValues("responseHeaders");
+    const currentHeaders = form?.getValues("responseHeaders")||[];
     form.setValue("responseHeaders", [
       ...currentHeaders,
       { label: "", value: "" },
@@ -101,11 +104,18 @@ function WebhookResponseNodeParameter() {
                     defaultValue={field.value}
                   >
                     <SelectTrigger>
-                      <SelectValue className="text-xs" placeholder="Select Respond With" />
+                      <SelectValue
+                        className="text-xs"
+                        placeholder="Select Respond With"
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {respondTypeOptions.map((type) => (
-                        <SelectItem className="text-xs" key={type.value} value={type.value}>
+                        <SelectItem
+                          className="text-xs"
+                          key={type.value}
+                          value={type.value}
+                        >
                           {type.label}
                         </SelectItem>
                       ))}
@@ -116,35 +126,38 @@ function WebhookResponseNodeParameter() {
               </FormItem>
             )}
           />
-          
-          
-            <FormField
-              control={form.control}
-              name="responseValue"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm">Response Value</FormLabel>
-                  <FormControl>
-                  <CodeEditor type={form.watch("respondWith")} nodes={["responseValue"]} value={field.value} onChange={field.onChange} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          
-            <FormField
-              control={form.control}
-              name="responseCode"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm">Response Code</FormLabel>
+
+          <FormField
+            control={form.control}
+            name="responseValue"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm">Response Value</FormLabel>
                 <FormControl>
-                  <Input 
-                    
-                    {...field} 
+                  <CodeEditor
+                    type={form.watch("respondWith")}
+                    nodes={["responseValue"]}
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="responseCode"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm">Response Code</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
                     onChange={(e) => field.onChange(Number(e.target.value))}
-                    className="text-xs" 
-                    placeholder="Enter Response Code" 
+                    className="text-xs"
+                    placeholder="Enter Response Code"
                   />
                 </FormControl>
                 <FormMessage />
@@ -153,7 +166,7 @@ function WebhookResponseNodeParameter() {
           />
           <FormItem>
             <FormLabel className="text-sm">Response Headers</FormLabel>
-            {form.watch("responseHeaders").map((header, index) => (
+            {form.watch("responseHeaders")?.map((header, index) => (
               <div key={index} className="flex items-center gap-2 mb-2">
                 <FormControl className="flex-1">
                   <Input
@@ -179,10 +192,10 @@ function WebhookResponseNodeParameter() {
                     }}
                   />
                 </FormControl>
-                <Button 
-                  type="button" 
-                  variant="ghost" 
-                  size="icon" 
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
                   className="text-destructive"
                   onClick={() => {
                     const currentHeaders = form.getValues("responseHeaders");
@@ -194,19 +207,18 @@ function WebhookResponseNodeParameter() {
                 </Button>
               </div>
             ))}
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={onAddHeader} 
-              size="sm" 
-
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onAddHeader}
+              size="sm"
               className="mt-2 w-full"
             >
               Add Header
             </Button>
           </FormItem>
         </div>
-        <Button type="submit" size="sm" className="mt-2">
+        <Button type="submit" disabled={isDisabled} size="sm" className="mt-2">
           Save Parameters
         </Button>
       </form>

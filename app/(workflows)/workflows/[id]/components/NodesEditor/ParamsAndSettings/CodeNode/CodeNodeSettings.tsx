@@ -1,4 +1,4 @@
-import { CodeNodeDataI,  } from "@/lib/types";
+import { CodeNodeDataI } from "@/lib/types";
 import React, { useCallback, useEffect } from "react";
 
 import { useWorkflowStore } from "@/app/store";
@@ -16,13 +16,14 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { useNodesEditor } from "../../../../hooks";
-import {  CodeNodeSettingsSchema, WebhookResponseNodeSettingsSchema } from "../../../../utils";
+import { CodeNodeSettingsSchema } from "../../../../utils";
 import { Textarea } from "@/components/ui/textarea";
-
+import { useDrawer } from "@/app/providers/drawerProvider";
 
 function CodeNodeSettings() {
   const { draftState, selectedNode } = useWorkflowStore();
   const { updateNodeSettings } = useNodesEditor();
+  const { setIsDisabled ,isDisabled} = useDrawer();
   const settings = draftState?.nodesSettings[selectedNode]
     ?.settings as CodeNodeDataI["settings"];
 
@@ -33,32 +34,39 @@ function CodeNodeSettings() {
       ...settings,
     },
   });
-  
+
   useEffect(() => {
     form.reset({
-      ...settings,
+      notes: settings?.notes || "",
+      onError: settings?.onError || "STOP",
+      retryOnFail: {
+        isEnabled: settings?.retryOnFail?.isEnabled || false,
+        maxTries: settings?.retryOnFail?.maxTries || 1,
+        waitBetweenTries: settings?.retryOnFail?.waitBetweenTries || 1000,
+      },
     });
   }, [settings]);
 
   const onSubmit = useCallback(
-    (data: z.infer<typeof CodeNodeSettingsSchema>) => {
+    async (data: z.infer<typeof CodeNodeSettingsSchema>) => {
       if (selectedNode) {
-        updateNodeSettings(data);
+        setIsDisabled(true);
+        await updateNodeSettings({
+          ...data,
+        });
+        setIsDisabled(false);
       }
     },
     [selectedNode, updateNodeSettings]
   );
 
-  
-
   return (
-    <Form {...form} >
+    <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="flex flex-col focus:!outline-none focus:!ring-0 text-xs gap-2 h-full w-full"
       >
         <div className="flex flex-col gap-2 px-1 h-full w-full overflow-auto">
-        
           <FormField
             control={form.control}
             name="notes"
@@ -73,7 +81,7 @@ function CodeNodeSettings() {
             )}
           />
         </div>
-        <Button type="submit" size="sm" className="mt-2">
+        <Button type="submit" disabled={isDisabled} size="sm" className="mt-2">
           Save Settings
         </Button>
       </form>
@@ -81,4 +89,4 @@ function CodeNodeSettings() {
   );
 }
 
-export default  CodeNodeSettings  ;
+export default CodeNodeSettings;

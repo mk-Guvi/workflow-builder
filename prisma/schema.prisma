@@ -16,63 +16,58 @@ model workflows {
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @default(now())
   is_deleted  Boolean         @default(false)
-
-  // Relations
-  nodes     workflowNodes[]  @relation("workflowToNodes")
-  edges     workflowEdges[]  @relation("workflowToEdges")
-  webhooks  webhooks[]      // Changed to simple one-to-many relation
+  webhooks    webhooks[]
+  edges       workflowEdges[] @relation("workflowToEdges")
+  nodes       workflowNodes[] @relation("workflowToNodes")
 }
 
 model workflowNodes {
-  id          String         @id @default(cuid())
-  workflowId  String
-  type        NodeType
-  positionX   Float
-  positionY   Float
-  label       String
-  icon        String?        
-  color       String?        
-  description String?        
-  data        Json?          
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-
-  // Relations
-  workflow    workflows       @relation("workflowToNodes", fields: [workflowId], references: [id])
+  id            String          @id @default(cuid())
+  workflowId    String
+  type          NodeType
+  positionX     Float
+  positionY     Float
+  label         String
+  icon          String?
+  color         String?
+  description   String?
+  data          Json?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
   outgoingEdges workflowEdges[] @relation("SourceToEdge")
   incomingEdges workflowEdges[] @relation("TargetToEdge")
+  webhook       webhooks?       // Add this relation
+  workflow      workflows       @relation("workflowToNodes", fields: [workflowId], references: [id])
 }
 
 model workflowEdges {
-  id          String         @id @default(cuid())
-  workflowId  String
-  sourceId    String
-  targetId    String
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  id         String        @id @default(cuid())
+  workflowId String
+  sourceId   String
+  targetId   String
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  source     workflowNodes @relation("SourceToEdge", fields: [sourceId], references: [id])
+  target     workflowNodes @relation("TargetToEdge", fields: [targetId], references: [id])
+  workflow   workflows     @relation("workflowToEdges", fields: [workflowId], references: [id])
+}
 
-  // Relations
-  workflow    workflows       @relation("workflowToEdges", fields: [workflowId], references: [id])
-  source      workflowNodes  @relation("SourceToEdge", fields: [sourceId], references: [id])
-  target      workflowNodes  @relation("TargetToEdge", fields: [targetId], references: [id])
+model webhooks {
+  id         String        @id @default(cuid())
+  path       String        
+  workflowId String
+  nodeId     String        @unique
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  method     WebhookMethod
+  workflow   workflows     @relation(fields: [workflowId], references: [id])
+  node       workflowNodes @relation(fields: [nodeId], references: [id])
 }
 
 enum NodeType {
   WEBHOOK_NODE
   CODE_NODE
   WEBHOOK_RESPONSE_NODE
-}
-
-model webhooks {
-  id          String         @id @default(cuid())
-  path        String         @unique
-  workflowId  String
-  method     WebhookMethod
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-
-  // Relations
-  workflow    workflows      @relation(fields: [workflowId], references: [id])
 }
 
 enum WebhookMethod {

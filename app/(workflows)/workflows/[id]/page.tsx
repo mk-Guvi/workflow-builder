@@ -27,7 +27,7 @@ import { useWorkflowStore } from "@/app/store";
 import CustomEdge from "./components/CustomEdge";
 import { useParams, useRouter } from "next/navigation";
 import LoadingSpinner from "@/components/loaders/SpinnerLoader";
-
+import { useChangeListener } from "@/hooks/debounceHook";
 
 function EditorPage() {
   const router = useRouter();
@@ -40,10 +40,10 @@ function EditorPage() {
     loading,
     error,
   } = useWorkflowStore();
-  
+
   const { id } = useParams();
   const { setOpen } = useDrawer();
-console.log({draftState})
+
   const [reactFlowInstance, setReactFlowInstance] =
     useState<ReactFlowInstance>();
 
@@ -177,10 +177,6 @@ console.log({draftState})
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
-      update({
-        showSave:true
-      })
-      console.log("Im here")
       updateNodes(applyNodeChanges(changes, draftState.nodes) as AllNodesI[]);
     },
     [draftState.nodes]
@@ -194,10 +190,9 @@ console.log({draftState})
 
   const onEdgesChange = useCallback(
     (changes: EdgeChange[]) => {
+      
       update({
-        showSave:true
-      })
-      update({
+        showSave:true,
         draftState: {
           ...draftState,
           edges: applyEdgeChanges(changes, draftState.edges),
@@ -209,10 +204,9 @@ console.log({draftState})
 
   const onConnect = useCallback(
     (params: Edge | Connection) => {
+      
       update({
-        showSave:true
-      })
-      update({
+        showSave:true,
         draftState: {
           ...draftState,
           edges: addEdge({ ...params, type: "default" }, draftState.edges),
@@ -258,7 +252,7 @@ console.log({draftState})
             }}
           >
             <Background />
-            <Controls />
+            <Controls  position="top-left"/>
           </ReactFlow>
         </div>
       </GlobalLayout>

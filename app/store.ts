@@ -26,7 +26,8 @@ type Store = StoreState & {
   updateNodeData: (nodeId: string, data: AllNodesDataI) => void;
 };
 
-export const useWorkflowStore = create<Store>((set) => ({
+export const useWorkflowStore = create<Store>((set,) => {
+  return {
   showSave: false,
   loading: true,
   error: "",
@@ -53,6 +54,7 @@ export const useWorkflowStore = create<Store>((set) => ({
   updateNodes: (nodes: AllNodesI[]) =>
     set((state) => ({
       ...state,
+      showSave:true,
       draftState: {
         ...state.draftState,
         nodes,
@@ -75,4 +77,5 @@ export const useWorkflowStore = create<Store>((set) => ({
         nodes: [...state.draftState.nodes, node],
       },
     })),
-}));
+}
+});

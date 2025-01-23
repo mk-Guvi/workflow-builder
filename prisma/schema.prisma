@@ -34,34 +34,34 @@ model workflowNodes {
   data          Json?
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
+  webhook       webhooks?
   outgoingEdges workflowEdges[] @relation("SourceToEdge")
   incomingEdges workflowEdges[] @relation("TargetToEdge")
-  webhook       webhooks?       // Add this relation
   workflow      workflows       @relation("workflowToNodes", fields: [workflowId], references: [id])
 }
 
 model workflowEdges {
   id         String        @id @default(cuid())
   workflowId String
-  sourceId   String
-  targetId   String
+  source  String
+  target   String
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
-  source     workflowNodes @relation("SourceToEdge", fields: [sourceId], references: [id])
-  target     workflowNodes @relation("TargetToEdge", fields: [targetId], references: [id])
+  sources     workflowNodes @relation("SourceToEdge", fields: [source], references: [id])
+  targets     workflowNodes @relation("TargetToEdge", fields: [target], references: [id])
   workflow   workflows     @relation("workflowToEdges", fields: [workflowId], references: [id])
 }
 
 model webhooks {
   id         String        @id @default(cuid())
-  path       String        
+  path       String
   workflowId String
-  nodeId     String        @unique
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
   method     WebhookMethod
-  workflow   workflows     @relation(fields: [workflowId], references: [id])
+  nodeId     String        @unique
   node       workflowNodes @relation(fields: [nodeId], references: [id])
+  workflow   workflows     @relation(fields: [workflowId], references: [id])
 }
 
 enum NodeType {

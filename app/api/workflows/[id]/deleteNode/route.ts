@@ -38,7 +38,7 @@ export const DELETE = async (req: Request, { params }: DeleteRequestParams) => {
         { status: 404 }
       );
     }
-console.log({nodeId})
+
     const node = await db.workflowNodes.findFirst({
       where: { id: nodeId },
     });

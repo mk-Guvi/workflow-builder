@@ -13,7 +13,6 @@ export const PUT = async (
       edges: LinkI[];
     };
 
-
     // Validate required fields
     if (!id || !nodes || !edges) {
       return Response.json(
@@ -21,10 +20,36 @@ export const PUT = async (
         { status: 400 }
       );
     }
-let hash_nodes_edges={}
+    const getAllEdges = await db.workflowEdges.findMany({
+      where: { workflowId: id },
+    });
+    const hashed_edges: Record<
+      string,
+      Pick<LinkI, "source" | "target">
+    > = getAllEdges.reduce((acc, edge) => {
+      acc[edge.id] = { source: edge.source, target: edge.target };
+      return acc;
+    }, {} as Record<string, Pick<LinkI, "source" | "target">>);
 
     for (const edge of edges) {
-      
+      if (!hashed_edges[edge.id]) {
+        await db.workflowEdges.create({
+          data: {
+            source: edge.source,
+            target: edge.target,
+            workflowId: id,
+            id: edge.id,
+          },
+        });
+      } else {
+        await db.workflowEdges.update({
+          where: { id: edge.id },
+          data: {
+            source: edge.source,
+            target: edge.target,
+          },
+        });
+      }
     }
 
     for (const node of nodes) {
@@ -33,16 +58,13 @@ let hash_nodes_edges={}
         data: {
           positionX: node.position.x,
           positionY: node.position.y,
-          color: node?.data?.color || '',
-          label: node?.data?.label || '',
-          icon: node?.data?.icon || '',
-          description: node?.data?.description || '',
-          
-          type: node.type,
+          color: node?.data?.color || "",
+          label: node?.data?.label || "",
+          icon: node?.data?.icon || "",
+          description: node?.data?.description || "",
         },
       });
     }
-   
 
     return Response.json({ error: false, message: "Workflow updated" });
   } catch (e) {

@@ -17,6 +17,7 @@ export const useNodesEditor = () => {
   } = useWorkflowStore();
 
   useEffect(() => {
+    if(!selectedNode)return;
     const findNode = draftState?.nodes?.find((d) => d?.id === selectedNode);
     if (findNode) {
       setNodeData(findNode);

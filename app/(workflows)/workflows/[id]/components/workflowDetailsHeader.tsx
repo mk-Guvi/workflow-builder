@@ -6,7 +6,7 @@ import React, {  useState } from "react";
 import { toast } from "sonner";
 
 const WorkflowDetailsHeader = () => {
-  const { loading, workflowDetails, showSave, update ,draftState,mainState} = useWorkflowStore();
+  const { loading, workflowDetails, showSave, update ,draftState} = useWorkflowStore();
   const [isSaving, setisSaving] = useState(false);
 
   const onSave = async () => {

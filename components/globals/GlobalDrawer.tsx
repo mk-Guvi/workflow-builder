@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/drawer";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useDrawer } from "@/app/providers/drawerProvider";
+import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 import clsx from "clsx";
 
 type Props = {
@@ -34,9 +36,16 @@ export default function DrawerComponent({
 }: Props) {
   const { isOpen, setClose, isFullScreen } = useDrawer();
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const pathname = usePathname();
   const handleClose = () => setClose();
 
-  React.useEffect(() => {
+  useEffect(() => {
+    console.log({pathname})
+    if(isOpen){
+handleClose();
+    }
+  }, [pathname]);
+  useEffect(() => {
     window.requestAnimationFrame(() => {
       document.body.style.pointerEvents = isOpen ? "auto" : "none";
     });

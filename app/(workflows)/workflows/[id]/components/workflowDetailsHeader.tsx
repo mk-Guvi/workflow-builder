@@ -42,9 +42,9 @@ const WorkflowDetailsHeader = () => {
   };
 
   return (
-    <div className="flex flex-row gap-6 flex-wrap justify-between items-center px-6 py-4 w-full dark:bg-black ">
+    <div className="flex flex-row gap-6 flex-wrap min-h-16 justify-between items-center px-6 py-4 w-full dark:bg-black ">
       {loading ? (
-        <Skeleton className="w-full max-w-[15rem] h-[2rem]" />
+        <Skeleton className="w-full max-w-[15rem] h-8" />
       ) : (
         <h1
           className="font-semibold text-lg max-w-[20rem] truncate"
@@ -55,9 +55,9 @@ const WorkflowDetailsHeader = () => {
       )}
 
       {loading || isSaving ? (
-        <Skeleton className="w-full max-w-[5rem] h-[2rem]" />
+        <Skeleton className="w-full max-w-[5rem] h-8" />
       ) : showSave ? (
-        <Button onClick={onSave}>Save</Button>
+        <Button size={'sm'}  onClick={onSave}>Save</Button>
       ) : null}
     </div>
   );

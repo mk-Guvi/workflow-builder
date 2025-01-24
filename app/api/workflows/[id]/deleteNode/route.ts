@@ -38,10 +38,15 @@ export const DELETE = async (req: Request, { params }: DeleteRequestParams) => {
         { status: 404 }
       );
     }
-
+    await db.workflowEdges.deleteMany({
+        where: {
+          OR: [{ source: nodeId }, { target: nodeId }],
+        },
+      });
     const node = await db.workflowNodes.findFirst({
       where: { id: nodeId },
     });
+   
 
     if (!node) {
       return Response.json(
@@ -60,7 +65,7 @@ export const DELETE = async (req: Request, { params }: DeleteRequestParams) => {
       if (nodeData?.parameters?.method && nodeData?.parameters?.path) {
         await db.webhooks.delete({
           where: {
-            nodeId
+            nodeId,
           },
         });
       }

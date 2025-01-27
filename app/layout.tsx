@@ -37,9 +37,7 @@ export default function RootLayout({
             <ModalProvider>
               <Sidebar />
               <Toaster />
-              <div className="w-full h-full">
-             {children}
-             </div>
+              <div className="w-full h-full">{children}</div>
             </ModalProvider>
           </DrawerProvider>
         </div>

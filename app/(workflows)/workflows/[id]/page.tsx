@@ -82,10 +82,12 @@ function EditorPage() {
   };
 
   useEffect(() => {
-    if (id) {
+    if (id&&!workflowDetails?.name) {
       onInit();
+    }else{
+      update({ loading: false });
     }
-  }, [id]);
+  }, [id,workflowDetails?.name]);
 
   const handleClick = () => {
     setOpen(

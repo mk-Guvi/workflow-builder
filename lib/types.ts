@@ -115,3 +115,12 @@ export type GetWorkflowsResponse = {
   };
 };
 
+
+export interface workflowHistoryT {
+  id: string;
+  workflowId: string;
+  status: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
+  createdAt: string;
+  updatedAt: string;
+  completedAt: string | null;
+}

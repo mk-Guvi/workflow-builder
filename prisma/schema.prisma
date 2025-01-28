@@ -81,7 +81,6 @@ model executionNodes {
   executionHistory executionsHistory @relation(fields: [executionId], references: [id])
   outgoingEdges executionEdges[] @relation("SourceToExecutionEdge")
   incomingEdges executionEdges[] @relation("TargetToExecutionEdge")
-
   executions executions[] @relation("executions")
 }
 
@@ -106,7 +105,7 @@ model executionsHistory {
   updatedAt  DateTime            @updatedAt
   executionEdges executionEdges[]
   executionNodes executionNodes[]
-
+ completedAt DateTime?   
   executions executions[]
 }
 
@@ -117,11 +116,11 @@ model executions {
   nodeId     String
   node       executionNodes      @relation("executions", fields: [nodeId], references: [id])
   createdAt  DateTime            @default(now())
-  updatedAt  DateTime            @updatedAt
-  completedAt DateTime?          
+  updatedAt  DateTime            @updatedAt       
   status     ExecutionStatus     @default(PENDING)
   executionHistory executionsHistory @relation(fields: [executionId], references: [id])
   outputJson Json?
+  completedAt DateTime?
 }
 
 enum NodeType {

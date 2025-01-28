@@ -50,3 +50,9 @@ export function getDateDifference({ fromDate, toDate }: { fromDate: string, toDa
       days
   };
 }
+
+
+export const getCurrentUTC = (): Date => {
+  const now = new Date();
+  return new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+};

@@ -1,10 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Worker, isMainThread, parentPort, workerData } from "worker_threads";
 import vm from "vm";
 import { getCurrentUTC } from "@/lib/utils";
+import moment from "moment-timezone";
+import axios from "axios";
 
 type RunJsScriptResult = {
   logs: string[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any;
   error?: string;
   executionTime?: Date;
@@ -22,11 +24,23 @@ if (!isMainThread) {
   const result: Partial<RunJsScriptResult> = { logs: capturedLogs };
 
   try {
+    // Create a mock require function for allowed modules
+    const mockRequire = (moduleName: string) => {
+      const allowedModules: Record<string, any> = {
+        'moment-timezone': moment,
+        'moment': moment,
+        'axios': axios
+      };
+      
+      if (moduleName in allowedModules) {
+        return allowedModules[moduleName];
+      }
+      throw new Error(`Module '${moduleName}' is not allowed`);
+    };
+
     const sandbox = {
       console: {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         log: (...args: any[]) => capturedLogs.push(args.join(" ")),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         error: (...args: any[]) => capturedLogs.push(args.join(" ")),
       },
       Math,
@@ -34,19 +48,49 @@ if (!isMainThread) {
       Buffer,
       TextEncoder,
       TextDecoder,
-      ...(options.allowUnsafe ? { process } : { require, fetch }),
+      moment,
+      axios,
+      require: mockRequire,
+      Promise,
+      setTimeout,
+      clearTimeout,
+      setInterval,
+      clearInterval,
     };
 
     const context = vm.createContext(sandbox);
-    const script = new vm.Script(code);
 
-    result.data = script.runInContext(context, {
+    // Wrap the code in an async function to allow await operations
+    const wrappedCode = `
+      (async function() {
+        try {
+          ${code}
+        } catch (error) {
+          console.error(error);
+          throw error;
+        }
+      })();
+    `;
+
+    const script = new vm.Script(wrappedCode);
+
+    // Run the script and handle async operations
+    Promise.resolve(script.runInContext(context, {
       timeout: options.timeout,
-      displayErrors: false,
+      displayErrors: true,
+    }))
+    .then(scriptResult => {
+      // Ensure data is always an object
+      result.data = typeof scriptResult === "object" && scriptResult !== null ? scriptResult : {};
+      parentPort?.postMessage(result);
+    })
+    .catch(error => {
+      result.error = error instanceof Error ? error.message : "Unknown error";
+      parentPort?.postMessage(result);
     });
+
   } catch (error) {
     result.error = error instanceof Error ? error.message : "Unknown error";
-  } finally {
     parentPort?.postMessage(result);
   }
 }
@@ -107,6 +151,3 @@ export async function runJsScript(
     });
   });
 }
-
-// Example usage:
-// const result = await runJsScript('console.log("Hello"); 42');

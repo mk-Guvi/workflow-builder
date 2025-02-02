@@ -13,10 +13,6 @@ const statusData = {
     color: "!bg-yellow-500",
     label: "Pending",
   },
-  RUNNING: {
-    color: "!bg-blue-500",
-    label: "Running",
-  },
   COMPLETED: {
     color: "!bg-green-500",
     label: "Completed",

@@ -1,23 +1,25 @@
 import { db } from "@/lib/db";
-import { NextRequest, NextResponse } from "next/server";
-import { executionNodes, executions, Prisma } from "@prisma/client";
-import { AllNodesDataI, WebhookNodeDataI } from "@/lib/types";
+import { NextRequest } from "next/server";
+import { executionNodes, Prisma } from "@prisma/client";
+import { WebhookNodeDataI, WebhookResponseNodeDataI } from "@/lib/types";
 import { getCurrentUTC } from "@/lib/utils";
+import { runJsScript } from "./services/CodeNodeServices";
+import { createResponse, getValidConnectedNodes } from "./helpers";
 
 export async function handler(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   const { id } = params;
-  let alreadyResponded = false;
   let executionId = "";
+  let outputJson: Prisma.InputJsonValue = {};
 
   if (!id) {
-    alreadyResponded = true;
-    return NextResponse.json(
-      { error: "Webhook ID is required" },
-      { status: 400 }
-    );
+    return createResponse({
+      error: true,
+      message: "Webhook ID is required",
+      status: 400,
+    });
   }
 
   try {
@@ -33,22 +35,19 @@ export async function handler(
     });
 
     if (!webhook?.node) {
-      alreadyResponded = true;
-      return NextResponse.json(
-        { error: true, message: "Webhook node not found" },
-        { status: 404 }
-      );
+      return createResponse({
+        error: true,
+        message: "Webhook node not found",
+        status: 400,
+      });
     }
 
     if (webhook.method !== req.method) {
-      alreadyResponded = true;
-      return NextResponse.json(
-        {
-          error: true,
-          message: `Invalid method. Expected ${webhook.method}, received ${req.method}.`,
-        },
-        { status: 405 }
-      );
+      return createResponse({
+        error: true,
+        message: `Invalid method.`,
+        status: 405,
+      });
     }
 
     const webhookNodeData: WebhookNodeDataI = JSON.parse(
@@ -59,63 +58,70 @@ export async function handler(
     const executionHistory = await db.executionsHistory.create({
       data: {
         workflowId: webhook.node!.workflowId,
-        status: "RUNNING",
+        status: "PENDING",
       },
     });
     executionId = executionHistory.id;
 
-    // Helper function to safely create execution nodes
-    const createExecutionNodes = async () => {
-      const workflowNodes = await db.workflowNodes.findMany({
-        where: { workflowId: webhook.node!.workflowId },
-      });
-
-      return Promise.all(
-        workflowNodes.map(async (node) => {
-          return db.executionNodes.create({
-            data: {
-              type: node.type,
-              positionX: node.positionX,
-              positionY: node.positionY,
-              label: node.label,
-              icon: node.icon,
-              color: node.color,
-              description: node.description,
-              data: (node.data as Prisma.InputJsonValue) ?? Prisma.DbNull,
-              executionId,
-            },
-          });
-        })
-      );
-    };
-
-    // Helper function to safely create execution edges
-    const createExecutionEdges = async () => {
-      const workflowEdges = await db.workflowEdges.findMany({
-        where: { workflowId: webhook.node!.workflowId },
-      });
-
-      return Promise.all(
-        workflowEdges.map(async (edge) =>
-          db.executionEdges.create({
-            data: {
-              source: edge.source,
-              target: edge.target,
-              executionId,
-            },
-          })
-        )
-      );
-    };
-
-    const [executionNodes, executionEdges] = await Promise.all([
-      createExecutionNodes(),
-      createExecutionEdges(),
+    // Get workflow nodes and edges
+    const [workflowNodes, workflowEdges] = await Promise.all([
+      db.workflowNodes.findMany({
+        where: { workflowId: webhook.node.workflowId },
+      }),
+      db.workflowEdges.findMany({
+        where: { workflowId: webhook.node.workflowId },
+      }),
     ]);
+
+    // Create execution nodes with a nodeMapping
+    const nodeMapping = new Map<string, string>();
+    const reverseNodeMapping = new Map<string, string>();
+
+    const executionNodes = await Promise.all(
+      workflowNodes.map(async (node) => {
+        const executionNode = await db.executionNodes.create({
+          data: {
+            type: node.type,
+            positionX: node.positionX,
+            positionY: node.positionY,
+            label: node.label,
+            icon: node.icon,
+            workflowNodeId: node.id,
+            color: node.color,
+            description: node.description,
+            data: (node.data as Prisma.InputJsonValue) ?? Prisma.DbNull,
+            executionId,
+          },
+        });
+        nodeMapping.set(node.id, executionNode.id);
+        reverseNodeMapping.set(executionNode.id, node.id);
+        return executionNode;
+      })
+    );
+
+    // Create execution edges using the nodeMapping
+    const executionEdges = await Promise.all(
+      workflowEdges.map(async (edge) => {
+        const sourceNodeId = nodeMapping.get(edge.source);
+        const targetNodeId = nodeMapping.get(edge.target);
+
+        if (!sourceNodeId || !targetNodeId) {
+          throw new Error(`Missing node mapping for edge: ${edge.id}`);
+        }
+
+        return db.executionEdges.create({
+          data: {
+            source: sourceNodeId,
+            target: targetNodeId,
+            executionId,
+          },
+        });
+      })
+    );
 
     // Find the webhook execution node
     const webhookExecutionNode = executionNodes.find(
-      (node) => node.id === webhook.nodeId
+      (node) => node.workflowNodeId === webhook.nodeId
     );
 
     if (!webhookExecutionNode) {
@@ -123,12 +129,21 @@ export async function handler(
         where: { id: executionHistory.id },
         data: { status: "FAILED", completedAt: getCurrentUTC() },
       });
-      alreadyResponded = true;
-      return NextResponse.json(
-        { error: true, message: "Webhook node not found in execution flow" },
-        { status: 500 }
-      );
+      return createResponse({
+        error: true,
+        message: "Webhook node not found in execution flow",
+        status: 500,
+      });
     }
+
+    // Get all valid connected nodes from the webhook node
+    const validNodeIds = getValidConnectedNodes(
+      webhookExecutionNode.id,
+      executionEdges.map((edge) => ({
+        source: edge.source,
+        target: edge.target,
+      }))
+    );
 
     // Create initial execution record
     const requestBody = await req.json().catch(() => ({}));
@@ -146,18 +161,18 @@ export async function handler(
       },
     });
 
-    // Handle immediate response
     if (webhookNodeData.parameters?.respondType === "IMMEDIATELY") {
-      NextResponse.json({
+      return createResponse({
         error: false,
         message: "Workflow Started",
+        data: { executionId: webhookExecution.id },
       });
-      alreadyResponded = true;
     }
 
     // Node execution logic
     let currentNode: executionNodes | undefined = webhookExecutionNode;
-    const currentExecution: executions = webhookExecution;
+    let lastWebhookResponseNode: executionNodes | undefined;
+    let lastWebhookResponseData: WebhookResponseNodeDataI | undefined;
 
     while (currentNode) {
       try {
@@ -169,101 +184,91 @@ export async function handler(
           ? executionNodes.find((node) => node.id === nextEdge.target)
           : undefined;
 
+        // Skip if the node is not in the valid set
+        if (currentNode && !validNodeIds.has(currentNode.id)) {
+          currentNode = undefined;
+          continue;
+        }
+
         if (currentNode) {
           const nodeData = JSON.parse(`${currentNode.data || ""}`);
 
-          let outputJson: Prisma.InputJsonValue = {};
           const newExecution = await db.executions.create({
             data: {
               nodeId: currentNode.id,
-              status: "RUNNING",
+              status: "PENDING",
               executionId,
             },
           });
-          try {
-            // Execute node based on type
-            switch (currentNode.type) {
-              case "CODE_NODE":
-                // Implement actual code execution logic
-                outputJson = {
-                  result: "Code executed successfully",
-                  output: nodeData.parameters?.code
-                    ? `Executed code: ${nodeData.parameters.code.slice(
-                        0,
-                        100
-                      )}...`
-                    : null,
-                };
-                break;
 
-              case "WEBHOOK_RESPONSE_NODE":
-                outputJson = {
-                  responseValue: nodeData.parameters?.responseValue || "OK",
-                  responseCode: nodeData.parameters?.responseCode || 200,
-                  responseHeaders: nodeData.parameters?.responseHeaders || [],
-                };
-                break;
+          switch (currentNode.type) {
+            case "CODE_NODE":
+              const code = nodeData.parameters?.code || "";
+              const executionOptions = {
+                timeout: nodeData.settings?.timeout || 10000,
+              };
 
-              default:
-                outputJson = {
-                  message: "Node processed",
-                  type: currentNode.type,
-                };
-            }
+              const { logs, data, error, executionTime } = await runJsScript(
+                code,
+                executionOptions
+              );
+              if (error) {
+                throw new Error(error);
+              }
 
-            // Update node execution status
-            await db.executions.update({
-              where: { id: webhookExecution.id },
-              data: {
-                status: "COMPLETED",
-                outputJson,
-                completedAt: getCurrentUTC(),
-              },
-            });
-          } catch (error: unknown) {
-            console.log(error);
-            await db.executions.update({
-              where: { id: webhookExecution.id },
-              data: {
-                status: "FAILED",
-                outputJson: { error } as Prisma.InputJsonValue,
-                completedAt: getCurrentUTC(),
-              },
-            });
+              outputJson = {
+                logs,
+                result: data,
+                executionTime,
+              };
+              break;
 
-            if (nodeData.settings?.onError === "STOP") {
-              currentNode = undefined;
-              await db.executionsHistory.update({
-                where: { id: executionHistory.id },
-                data: { status: "FAILED", completedAt: getCurrentUTC() },
-              });
-            }
+            case "WEBHOOK_RESPONSE_NODE":
+              lastWebhookResponseNode = currentNode;
+              lastWebhookResponseData = nodeData as WebhookResponseNodeDataI;
+              outputJson = {
+                responseValue: nodeData.parameters?.responseValue || "OK",
+                responseCode: nodeData.parameters?.responseCode || 200,
+                responseHeaders: nodeData.parameters?.responseHeaders || [],
+              };
+              break;
+
+            default:
+              outputJson = {
+                message: "Node processed",
+                type: currentNode.type,
+              };
           }
-        }
-      } catch (error: unknown) {
-        // Error handling
-        const errorMessage =
-          error instanceof Error ? error.message : "Unknown error";
 
-        await db.executions.update({
-          where: { id: webhookExecution.id },
-          data: {
-            status: "FAILED",
-            outputJson: { error: errorMessage } as Prisma.InputJsonValue,
-          },
-        });
+          await db.executions.update({
+            where: { id: newExecution.id, nodeId: currentNode?.id },
+            data: {
+              status: "COMPLETED",
+              outputJson,
+              completedAt: getCurrentUTC(),
+            },
+          });
+        }
+      } catch (error) {
+        if (currentNode?.id) {
+          await db.executions.update({
+            where: { id: webhookExecution.id, nodeId: currentNode?.id },
+            data: {
+              status: "FAILED",
+              outputJson: { error: JSON.stringify(error) },
+              completedAt: getCurrentUTC(),
+            },
+          });
+        }
 
         const nodeData = JSON.parse(`${currentNode?.data || ""}`);
-
-        if (nodeData?.parameters?.onError === "STOP") {
+        if (nodeData?.settings?.onError === "STOP") {
           await db.executionsHistory.update({
             where: { id: executionHistory.id },
             data: { status: "FAILED", completedAt: getCurrentUTC() },
           });
-          
           currentNode = undefined;
         } else {
-          // Continue to next node if configured
           const nextEdge = executionEdges.find(
             (edge) => edge.source === currentNode?.id
           );
@@ -274,7 +279,6 @@ export async function handler(
       }
     }
 
-    // Final completion if no response node found
     await db.executionsHistory.update({
       where: { id: executionHistory.id },
       data: {
@@ -283,28 +287,50 @@ export async function handler(
       },
     });
 
-    if (webhookNodeData.parameters?.respondType === "LAST_NODE") {
-      alreadyResponded = true;
-      return NextResponse.json({
+    if (
+      webhookNodeData.parameters?.respondType === "RESPONSE_WEBHOOK" &&
+      lastWebhookResponseNode &&
+      lastWebhookResponseData
+    ) {
+      return createResponse({
         error: false,
-        executionId: executionHistory.id,
-        output: currentExecution.outputJson || {},
+        data: lastWebhookResponseData.parameters.responseValue,
+        status: lastWebhookResponseData.parameters.responseCode || 200,
+        headers: Object.fromEntries(
+          lastWebhookResponseData.parameters.responseHeaders.map((h) => [
+            h.label,
+            h.value,
+          ])
+        ),
       });
     }
-  } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error";
-    await db.executionsHistory.update({
-      where: { id: executionId },
-      data: { status: "FAILED", completedAt: getCurrentUTC() },
-    });
-    console.log(errorMessage);
-    if (!alreadyResponded) {
-      return NextResponse.json(
-        { error: true, message: `Webhook processing failed` },
-        { status: 500 }
-      );
+
+    if (webhookNodeData.parameters?.respondType === "LAST_NODE") {
+      return createResponse({
+        error: false,
+
+        data: outputJson || {},
+      });
     }
+
+    return createResponse({
+      error: false,
+      message: "Workflow Completed",
+      data: outputJson || {},
+    });
+  } catch (error: unknown) {
+    if (executionId) {
+      await db.executionsHistory.update({
+        where: { id: executionId },
+        data: { status: "FAILED", completedAt: getCurrentUTC() },
+      });
+    }
+    console.error(error);
+    return createResponse({
+      error: true,
+      message: "Webhook processing failed",
+      status: 500,
+    });
   }
 }
 

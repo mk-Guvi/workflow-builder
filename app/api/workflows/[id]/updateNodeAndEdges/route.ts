@@ -12,7 +12,7 @@ export const PUT = async (
       nodes: AllNodesI[];
       edges: LinkI[];
     };
-
+console.log(nodes,edges,'nodes,edges');
     // Validate required fields
     if (!id || !nodes || !edges) {
       return Response.json(
@@ -20,19 +20,12 @@ export const PUT = async (
         { status: 400 }
       );
     }
-    const getAllEdges = await db.workflowEdges.findMany({
+
+    await db.workflowEdges.deleteMany({
       where: { workflowId: id },
     });
-    const hashed_edges: Record<
-      string,
-      Pick<LinkI, "source" | "target">
-    > = getAllEdges.reduce((acc, edge) => {
-      acc[edge.id] = { source: edge.source, target: edge.target };
-      return acc;
-    }, {} as Record<string, Pick<LinkI, "source" | "target">>);
 
     for (const edge of edges) {
-      if (!hashed_edges[edge.id]) {
         await db.workflowEdges.create({
           data: {
             source: edge.source,
@@ -41,15 +34,7 @@ export const PUT = async (
             id: edge.id,
           },
         });
-      } else {
-        await db.workflowEdges.update({
-          where: { id: edge.id },
-          data: {
-            source: edge.source,
-            target: edge.target,
-          },
-        });
-      }
+       
     }
 
     for (const node of nodes) {

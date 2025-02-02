@@ -206,7 +206,6 @@ function EditorPage() {
 
   const onConnect = useCallback(
     (params: Edge | Connection) => {
-      console.log({params});
       update({
         showSave:true,
         draftState: {

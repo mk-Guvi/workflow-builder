@@ -8,17 +8,17 @@ datasource db {
 }
 
 model workflows {
-  id          String          @id @default(uuid())
-  is_active   Boolean         @default(false)
-  name        String
-  description String
-  user_id     String
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @default(now())
-  is_deleted  Boolean         @default(false)
-  webhooks    webhooks[]
-  edges       workflowEdges[] @relation("workflowToEdges")
-  nodes       workflowNodes[] @relation("workflowToNodes")
+  id                String              @id @default(uuid())
+  is_active         Boolean             @default(false)
+  name              String
+  description       String
+  user_id           String
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @default(now())
+  is_deleted        Boolean             @default(false)
+  webhooks          webhooks[]
+  edges             workflowEdges[]     @relation("workflowToEdges")
+  nodes             workflowNodes[]     @relation("workflowToNodes")
   executionsHistory executionsHistory[] @relation("workflow")
 }
 
@@ -66,62 +66,62 @@ model webhooks {
 }
 
 model executionNodes {
-  id            String           @id @default(cuid())
-  type          NodeType
-  positionX     Float
-  positionY     Float
-  label         String
-  icon          String?
-  color         String?
-  description   String?
-  data          Json?
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-  workflowNodeId String
-  executionId   String
+  id               String            @id @default(cuid())
+  type             NodeType
+  positionX        Float
+  positionY        Float
+  label            String
+  icon             String?
+  color            String?
+  description      String?
+  data             Json?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  workflowNodeId   String
+  executionId      String
   executionHistory executionsHistory @relation(fields: [executionId], references: [id])
-  outgoingEdges executionEdges[] @relation("SourceToExecutionEdge")
-  incomingEdges executionEdges[] @relation("TargetToExecutionEdge")
-  executions executions[] @relation("executions")
+  outgoingEdges    executionEdges[]  @relation("SourceToExecutionEdge")
+  incomingEdges    executionEdges[]  @relation("TargetToExecutionEdge")
+  executions       executions[]      @relation("executions")
 }
 
 model executionEdges {
-  id          String         @id @default(cuid())
-  source      String
-  target      String
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  executionId String
+  id               String            @id @default(cuid())
+  source           String
+  target           String
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  executionId      String
   executionHistory executionsHistory @relation(fields: [executionId], references: [id])
-  sources     executionNodes @relation("SourceToExecutionEdge", fields: [source], references: [id])
-  targets     executionNodes @relation("TargetToExecutionEdge", fields: [target], references: [id])
+  sources          executionNodes    @relation("SourceToExecutionEdge", fields: [source], references: [id])
+  targets          executionNodes    @relation("TargetToExecutionEdge", fields: [target], references: [id])
 }
 
 model executionsHistory {
-  id         String              @id @default(cuid())
-  workflowId String
-  workflow   workflows           @relation("workflow", fields: [workflowId], references: [id])
-  status     ExecutionStatus
-  createdAt  DateTime            @default(now())
-  updatedAt  DateTime            @updatedAt
+  id             String           @id @default(cuid())
+  workflowId     String
+  workflow       workflows        @relation("workflow", fields: [workflowId], references: [id])
+  status         ExecutionStatus
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
   executionEdges executionEdges[]
   executionNodes executionNodes[]
- completedAt DateTime?   
-  executions executions[]
+  completedAt    DateTime?
+  executions     executions[]
 }
 
 
 model executions {
-  id         String              @id @default(uuid())
-  executionId String
-  nodeId     String
-  node       executionNodes      @relation("executions", fields: [nodeId], references: [id])
-  createdAt  DateTime            @default(now())
-  updatedAt  DateTime            @updatedAt       
-  status     ExecutionStatus     @default(PENDING)
+  id               String            @id @default(uuid())
+  executionId      String
+  nodeId           String
+  node             executionNodes    @relation("executions", fields: [nodeId], references: [id])
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  status           ExecutionStatus   @default(PENDING)
   executionHistory executionsHistory @relation(fields: [executionId], references: [id])
-  outputJson Json?
-  completedAt DateTime?
+  outputJson       Json?
+  completedAt      DateTime?
 }
 
 enum NodeType {

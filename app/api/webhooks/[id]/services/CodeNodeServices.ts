@@ -9,7 +9,7 @@ type RunJsScriptResult = {
   logs: string[];
   data: any;
   error?: string;
-  executionTime?: Date;
+  executionTime?: Date|string;
 };
 
 type RunJsScriptOptions = {

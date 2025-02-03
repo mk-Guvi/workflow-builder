@@ -1,58 +1,50 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+import moment from "moment-timezone";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
-export const formatDateToDayMonthTime = (dateString:string) => {
-  const date = new Date(dateString);
-  
+export const formatDateToDayMonthTime = (dateString: string, timeZone: string = moment.tz.guess()) => {
+  const date = moment.tz(dateString, "UTC").tz(timeZone);
+
   // Extract date and time components
-  const day = date.getDate();
-  const month = date.toLocaleString('en-US', { month: 'short' }); // Short month name (e.g., Jan, Feb)
-  const time = date.toLocaleTimeString('en-US', { hour12: false }); // Time in 24-hour format
-  
+  const day = date.date();
+  const month = date.format("MMM"); // Short month name (e.g., Jan, Feb)
+  const time = date.format("HH:mm:ss"); // Time in 24-hour format
+
   return `${day} ${month} at ${time}`;
 };
 
 interface TimeDifference {
-  seconds: number;  // 0-59
-  minutes: number;  // 0-59
-  hours: number;    // 0-23
-  days: number;     // unlimited
+  seconds: number; // 0-59
+  minutes: number; // 0-59
+  hours: number; // 0-23
+  days: number; // unlimited
 }
 
-export function getDateDifference({ fromDate, toDate }: { fromDate: string, toDate: string }): TimeDifference {
- 
-  if (new Date(fromDate) > new Date(toDate)) {
-      [fromDate, toDate] = [toDate, fromDate];
+export function getDateDifference({ fromDate, toDate, timeZone }: { fromDate: string; toDate: string; timeZone?: string }): TimeDifference {
+  timeZone = timeZone || moment.tz.guess();
+  
+  let from = moment.tz(fromDate, "UTC").tz(timeZone);
+  let to = moment.tz(toDate, "UTC").tz(timeZone);
+  
+  if (from.isAfter(to)) {
+    [from, to] = [to, from];
   }
 
-  // Get the difference in milliseconds
-  const diffInMs = new Date(toDate).getTime() - new Date(fromDate).getTime();
-
-  // Calculate total seconds first
-  const totalSeconds = Math.floor(diffInMs / 1000);
-
-  // Calculate each unit
-  const seconds = totalSeconds % 60;  // Gets remainder after dividing by 60
-  const totalMinutes = Math.floor(totalSeconds / 60);
-  const minutes = totalMinutes % 60;  // Gets remainder after dividing by 60
-  const totalHours = Math.floor(totalMinutes / 60);
-  const hours = totalHours % 24;      // Gets remainder after dividing by 24
-  const days = Math.floor(totalHours / 24);
+  // Get the difference
+  const duration = moment.duration(to.diff(from));
 
   return {
-      seconds,
-      minutes,
-      hours,
-      days
+    seconds: duration.seconds(),
+    minutes: duration.minutes(),
+    hours: duration.hours(),
+    days: duration.days(),
   };
 }
 
-
-export const getCurrentUTC = (): Date => {
-  const now = new Date();
-  return new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+export const getCurrentUTC = (): string => {
+  return moment.utc().format();
 };

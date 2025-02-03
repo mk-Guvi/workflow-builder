@@ -111,7 +111,6 @@ export const onGetWorkflows = async ({
 }: GetWorkflowsParams = {}): Promise<GetWorkflowsResponse> => {
   try {
     const user_id = "1";
-
     if (!user_id) {
       return {
         error: "Unauthorized",

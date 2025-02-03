@@ -12,7 +12,7 @@ export const PUT = async (
       nodes: AllNodesI[];
       edges: LinkI[];
     };
-console.log(nodes,edges,'nodes,edges');
+
     // Validate required fields
     if (!id || !nodes || !edges) {
       return Response.json(

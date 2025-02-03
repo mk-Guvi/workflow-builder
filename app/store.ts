@@ -41,6 +41,7 @@ type StoreState = {
     current_page: number;
     total_pages: number;
     total_count: number;
+    page_size: number;
   };
 };
 
@@ -82,6 +83,7 @@ export const useWorkflowStore = create<Store>((set) => {
       current_page: 1,
       total_pages: 0,
       total_count: 0,
+      page_size:25
     },
     updateExecutionState: (partialState) =>
       set((state) => ({

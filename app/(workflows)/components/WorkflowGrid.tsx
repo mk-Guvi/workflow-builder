@@ -1,20 +1,13 @@
-import { Button } from "@/components/ui/button";
 import WorkflowCard from "./WorkflowCard";
 import { onGetWorkflows } from "../_actions/workflowsActions";
-import Link from "next/link";
+import { ErrorView } from "./ErrorView";
+
 
 export default async function WorkflowGrid() {
   const { error, workflows } = await onGetWorkflows();
 
   if (error) {
-    return (
-      <div className="text-center p-4">
-        <p className="text-red-500 mb-4">Error: {error}</p>
-        <Link href={"/"} >
-        <Button>Retry</Button>
-        </Link>
-      </div>
-    );
+    return <ErrorView error={error} />;
   }
 
   if (!workflows || workflows.length === 0) {

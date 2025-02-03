@@ -28,7 +28,6 @@ import CustomEdge from "./components/CustomEdge";
 import { useParams, useRouter } from "next/navigation";
 import LoadingSpinner from "@/components/loaders/SpinnerLoader";
 
-
 function EditorPage() {
   const router = useRouter();
   const {
@@ -82,12 +81,12 @@ function EditorPage() {
   };
 
   useEffect(() => {
-    if (id&&!workflowDetails?.name) {
+    if (id && workflowDetails?.id !== id) {
       onInit();
-    }else{
+    } else {
       update({ loading: false });
     }
-  }, [id,workflowDetails?.name]);
+  }, [id, workflowDetails?.name]);
 
   const handleClick = () => {
     setOpen(
@@ -192,9 +191,8 @@ function EditorPage() {
 
   const onEdgesChange = useCallback(
     (changes: EdgeChange[]) => {
-      
       update({
-        showSave:true,
+        showSave: true,
         draftState: {
           ...draftState,
           edges: applyEdgeChanges(changes, draftState.edges),
@@ -207,7 +205,7 @@ function EditorPage() {
   const onConnect = useCallback(
     (params: Edge | Connection) => {
       update({
-        showSave:true,
+        showSave: true,
         draftState: {
           ...draftState,
           edges: addEdge({ ...params, type: "default" }, draftState.edges),
@@ -253,7 +251,7 @@ function EditorPage() {
             }}
           >
             <Background />
-            <Controls  position="top-left"/>
+            <Controls position="top-left" />
           </ReactFlow>
         </div>
       </GlobalLayout>

@@ -44,7 +44,7 @@ const respondTypeOptions = [
 
 function WebhookNodeParameter() {
   const { nodesData, selectedNode } = useWorkflowStore();
-  const { updateNodeParams } = useNodesEditor();
+  const { updateNodeParams ,executionId} = useNodesEditor();
   const { setIsDisabled ,isDisabled} = useDrawer();
   const params = nodesData?.[selectedNode]
     ?.parameters as WebhookNodeDataI["parameters"];
@@ -168,9 +168,16 @@ function WebhookNodeParameter() {
             )}
           />
         </div>
-        <Button type="submit" disabled={isDisabled} size={"sm"} className="mt-2">
-          Save Settings
-        </Button>
+        {executionId ? null : (
+          <Button
+            type="submit"
+            disabled={isDisabled}
+            size="sm"
+            className="mt-2"
+          >
+            Save Parameters
+          </Button>
+        )}
       </form>
     </Form>
   );

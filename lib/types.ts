@@ -22,6 +22,8 @@ export interface AllNodesI extends Node {
   id: string;
   type: TNodeTypes;
   position: { x: number; y: number };
+  workflowNodeId?: string;
+  status?: "PENDING" | "COMPLETED" | "FAILED";
   data: {
     label: string;
     icon?: string;

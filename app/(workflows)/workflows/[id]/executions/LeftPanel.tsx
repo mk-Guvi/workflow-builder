@@ -40,7 +40,8 @@ function LeftPanel() {
   } = useWorkflowStore();
 
   const onChangePageSize = (value: string) => {
-    updateExecutionState({ page_size: parseInt(value) });
+    updateExecutionState({ page_size: parseInt(value), current_page: 1 });
+    recordChanges();
   };
 
   const getWorkflowHistory = async () => {
@@ -90,64 +91,66 @@ function LeftPanel() {
 
   return (
     <div className="h-full  w-full flex flex-col">
-      <header className="flex items-center justify-between border-b p-3  gap-1">
-        <Button
-          disabled={current_page <= 1}
-          onClick={() => {
-            updateExecutionState({ current_page: current_page - 1 });
-            recordChanges();
-          }}
-          variant={"outline"}
-          size={"sm"}
-        >
-          <ChevronLeftSquareIcon />
-        </Button>
-        <div className="flex items-center gap-2">
-          <Input
-            className="max-w-[4rem]"
-            onChange={(e) => {
-              const value = parseInt(e.target.value);
-              if (value < 1 || value > total_pages) return;
-              updateExecutionState({ current_page: value });
+      {total_pages >= 1 ? (
+        <header className="flex items-center justify-between border-b p-3  gap-1">
+          <Button
+            disabled={current_page <= 1}
+            onClick={() => {
+              updateExecutionState({ current_page: current_page - 1 });
               recordChanges();
             }}
-            value={current_page}
-            type="number"
-          />
-          <span>/ {total_pages}</span>
-        </div>
-        <Button
-          disabled={current_page >= total_pages}
-          variant={"outline"}
-          size={"sm"}
-          onClick={() => {
-            updateExecutionState({ current_page: current_page + 1 });
-            recordChanges();
-          }}
-        >
-          <ChevronRightSquareIcon />
-        </Button>
-        <Select value={`${page_size}`} onValueChange={onChangePageSize}>
-          <SelectTrigger className="w-[70px]">
-            <SelectValue placeholder="page size" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectItem value="25">25</SelectItem>
-              <SelectItem value="50">50</SelectItem>
-              <SelectItem value="100">100</SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-        <Button
-          disabled={listLoading}
-          onClick={recordChanges}
-          variant={"outline"}
-          size={"sm"}
-        >
-          <RefreshCw />
-        </Button>
-      </header>
+            variant={"outline"}
+            size={"sm"}
+          >
+            <ChevronLeftSquareIcon />
+          </Button>
+          <div className="flex items-center gap-2">
+            <Input
+              className="max-w-[4rem]"
+              onChange={(e) => {
+                const value = parseInt(e.target.value);
+                if (value < 1 || value > total_pages) return;
+                updateExecutionState({ current_page: value });
+                recordChanges();
+              }}
+              value={current_page}
+              type="number"
+            />
+            <span>/ {total_pages}</span>
+          </div>
+          <Button
+            disabled={current_page >= total_pages}
+            variant={"outline"}
+            size={"sm"}
+            onClick={() => {
+              updateExecutionState({ current_page: current_page + 1 });
+              recordChanges();
+            }}
+          >
+            <ChevronRightSquareIcon />
+          </Button>
+          <Select value={`${page_size}`} onValueChange={onChangePageSize}>
+            <SelectTrigger className="w-[70px]">
+              <SelectValue placeholder="page size" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="25">25</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <Button
+            disabled={listLoading}
+            onClick={recordChanges}
+            variant={"outline"}
+            size={"sm"}
+          >
+            <RefreshCw />
+          </Button>
+        </header>
+      ) : null}
 
       <main className="flex-1 h-full w-full pb-4 flex flex-col divide-y divide-neutral-200 gap-1 overflow-auto relative p-2 ">
         <LoadingSpinner isLoading={listLoading} />

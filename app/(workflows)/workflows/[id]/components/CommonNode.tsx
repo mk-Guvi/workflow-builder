@@ -29,7 +29,7 @@ type CommonNodeProps = Pick<
 
 const CommonNode = ({ type, data, selected, dragging }: CommonNodeProps) => {
   const { update } = useWorkflowStore();
-  const { onDeleteNode } = useNodesEditor();
+  const { onDeleteNode ,executionId} = useNodesEditor();
   const { setOpen, setFullScreen } = useDrawer();
   const [deleting, setDeleting] = React.useState(false);
   const nodeId = useNodeId();
@@ -61,7 +61,7 @@ const CommonNode = ({ type, data, selected, dragging }: CommonNodeProps) => {
   }) => {
     e.stopPropagation();
     e.preventDefault();
-    if (!deleting) {
+    if (!deleting&&!executionId) {
       setDeleting(true);
       await onDeleteNode(`${nodeId}`);
       setDeleting(false);
@@ -70,11 +70,12 @@ const CommonNode = ({ type, data, selected, dragging }: CommonNodeProps) => {
 
   return (
     <TooltipProvider>
-      <Tooltip delayDuration={0}>
+      <Tooltip delayDuration={0} >
         <TooltipTrigger>
           <TooltipContent
             side="top"
-            className="bg-transparent text-gray-500 p-1  backdrop-blur-xl"
+            
+            className={`bg-transparent text-gray-500 p-1  backdrop-blur-xl ${executionId?"pointer-events-none hidden":""}`}
           >
             <Trash2Icon
               size={16}

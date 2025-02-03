@@ -2,15 +2,16 @@ import { db } from "@/lib/db";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string; executionId: string } }
 ) {
   try {
     const user_id = "1";
     const id = params.id;
+    const executionId = params.executionId;
 
-    if (!id)
+    if (!id|| !executionId)
       return Response.json(
-        {erro:true, message: "Workflow ID is required" },
+        { error:true,message: "Workflow ID and ExecutionId is required" },
         { status: 400 }
       );
 
@@ -25,11 +26,11 @@ export async function GET(
       );
     }
 
-    const nodes = await db.workflowNodes.findMany({
-      where: { workflowId: id },
+    const nodes = await db.executionNodes.findMany({
+      where: { executionId },
       select: {
         id: true,
-        workflowId: true,
+        executionId: true,
         type: true,
         positionX: true,
         positionY: true,
@@ -39,12 +40,12 @@ export async function GET(
         description: true,
         createdAt: true,
         updatedAt: true,
-        // Exclude 'data' by not including it here
+        workflowNodeId: true,
       },
     });
 
-    const edges = await db.workflowEdges.findMany({
-      where: { workflowId: id },
+    const edges = await db.executionEdges.findMany({
+      where: { executionId },
     });
 
     return Response.json(
@@ -54,6 +55,7 @@ export async function GET(
         nodes: nodes?.map(({ positionX, positionY, ...rest }) => ({
           id: rest.id,
           type: rest.type,
+          workflowNodeId: rest.workflowNodeId,
           position: { x: positionX, y: positionY },
           data:{
             label: rest.label,

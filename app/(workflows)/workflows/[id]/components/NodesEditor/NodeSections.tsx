@@ -24,8 +24,8 @@ const SettingsRenderer: Record<TNodeTypes, React.FC> = {
 };
 
 function NodeSections() {
-  const { nodeData } = useNodesEditor();
-  const { nodesData, updateNodeData, workflowDetails } =
+  const { nodeData, executionId } = useNodesEditor();
+  const { nodesData, updateNodeData, workflowDetails, executionState } =
     useWorkflowStore();
   const ParamsView = (nodeData?.type && ParamsRenderer[nodeData?.type]) || null;
   const SettingsView =
@@ -57,17 +57,24 @@ function NodeSections() {
         loading: true,
         error: "",
       });
-      const response = await fetch(
-        `/api/workflows/${workflowDetails?.id}/getNodeData?nodeId=${nodeData?.id}`
-      );
+      let url = `/api/workflows/${workflowDetails?.id}`;
+      if (executionId) {
+        url = `${url}/executions/${executionId}/getNodeData?nodeId=${
+          nodeData?.workflowNodeId || ""
+        }`;
+      } else {
+        url = `${url}/getNodeData?nodeId=${nodeData?.id}`;
+      }
+      const response = await fetch(url);
       const data = await response.json();
+      
       if (data?.error === false) {
         setState({
           loading: false,
           error: "",
         });
         updateNodeData(`${nodeData?.id}`, {
-          ...data?.data,
+          ...(executionId ? data?.nodeData?.data : data?.data),
         });
       } else {
         if (data?.message) {
@@ -87,7 +94,7 @@ function NodeSections() {
       });
     }
   };
-
+  
   return (
     <Tabs
       defaultValue="parameters"

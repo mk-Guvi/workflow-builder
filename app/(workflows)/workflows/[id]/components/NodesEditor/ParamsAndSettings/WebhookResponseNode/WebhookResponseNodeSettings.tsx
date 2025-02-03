@@ -22,7 +22,7 @@ import { useDrawer } from "@/app/providers/drawerProvider";
 
 function WebhookResponseNodeSettings() {
   const { nodesData, selectedNode } = useWorkflowStore();
-  const { updateNodeSettings } = useNodesEditor();
+  const { updateNodeSettings, executionId } = useNodesEditor();
   const settings = nodesData?.[selectedNode]
     ?.settings as WebhookResponseNodeDataI["settings"];
   const { isDisabled, setIsDisabled } = useDrawer();
@@ -74,9 +74,16 @@ function WebhookResponseNodeSettings() {
             )}
           />
         </div>
-        <Button type="submit" disabled={isDisabled} size="sm" className="mt-2">
-          Save Settings
-        </Button>
+        {executionId ? null : (
+          <Button
+            type="submit"
+            disabled={isDisabled}
+            size="sm"
+            className="mt-2"
+          >
+            Save Settings
+          </Button>
+        )}
       </form>
     </Form>
   );

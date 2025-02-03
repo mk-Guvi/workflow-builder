@@ -22,7 +22,7 @@ import { useDrawer } from "@/app/providers/drawerProvider";
 
 function CodeNodeSettings() {
   const { nodesData, selectedNode } = useWorkflowStore();
-  const { updateNodeSettings } = useNodesEditor();
+  const { updateNodeSettings, executionId } = useNodesEditor();
   const { setIsDisabled, isDisabled } = useDrawer();
   const settings = nodesData?.[selectedNode]
     ?.settings as CodeNodeDataI["settings"];
@@ -75,9 +75,16 @@ function CodeNodeSettings() {
             )}
           />
         </div>
-        <Button type="submit" disabled={isDisabled} size="sm" className="mt-2">
-          Save Settings
-        </Button>
+        {executionId ? null : (
+          <Button
+            type="submit"
+            disabled={isDisabled}
+            size="sm"
+            className="mt-2"
+          >
+            Save Settings
+          </Button>
+        )}
       </form>
     </Form>
   );

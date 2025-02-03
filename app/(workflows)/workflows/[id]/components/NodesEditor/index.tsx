@@ -25,6 +25,7 @@ const CustomHandle = ({ disabled }: { disabled: boolean }) =>
       </div>
     </ResizableHandle>
   );
+  
 function NodesEditor() {
   const { setClose } = useDrawer();
   const [fullScreenView, setFullScreenView] = useState("");

@@ -1,28 +1,34 @@
 import { useWorkflowStore } from "@/app/store";
 import { AllNodesDataI, AllNodesI } from "@/lib/types";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 export const useNodesEditor = () => {
-  const [nodeData, setNodeData] = useState<AllNodesI | null>(null);
-
+  
+  const searchParams = useSearchParams();
+  const executionId = searchParams.get("e_id");
   const {
     selectedNode,
     draftState,
     nodesData,
+    executionState,
     updateNodeData,
     update,
     deleteNode,
     workflowDetails,
   } = useWorkflowStore();
 
-  useEffect(() => {
-    if(!selectedNode)return;
-    const findNode = draftState?.nodes?.find((d) => d?.id === selectedNode);
-    if (findNode) {
-      setNodeData(findNode);
-    }
-  }, [selectedNode, draftState]);
+  const nodeData = useMemo(() => {
+    if (!selectedNode) return;
+    const findNode = executionId
+      ? executionState?.executionsDetails?.nodes?.find(
+          (d) => d?.id === selectedNode
+        )
+      : draftState?.nodes?.find((d) => d?.id === selectedNode);
+   
+    return findNode
+  }, [selectedNode, draftState, executionId, executionState]);
 
   const updateNodeParams = useCallback(
     async (payload: AllNodesDataI["parameters"]) => {
@@ -181,5 +187,6 @@ export const useNodesEditor = () => {
     updateNodeParams,
     updateNodeSettings,
     onDeleteNode,
+    executionId,
   };
 };

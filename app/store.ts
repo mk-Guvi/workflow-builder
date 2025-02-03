@@ -29,15 +29,11 @@ type StoreState = {
     detailError: string;
     selectedExecution: Workflow | null;
     executions: workflowHistoryT[];
-    executionsDetails: Record<
-      string,
-      {
-        nodes: AllNodesDataI[];
-        edges: LinkI[];
-        nodesData: Record<string, AllNodesDataI>;
-        workflow: Workflow;
-      }
-    >;
+    executionsDetails: {
+      nodes: AllNodesI[];
+      edges: LinkI[];
+      nodesData: Record<string, AllNodesDataI>; 
+    };
     current_page: number;
     total_pages: number;
     total_count: number;
@@ -78,7 +74,11 @@ export const useWorkflowStore = create<Store>((set) => {
       listError: "",
       detailError: "",
       selectedExecution: null,
-      executionsDetails: {},
+      executionsDetails: {
+        edges:[],
+        nodes:[],
+        nodesData:{}
+      },
       executions: [],
       current_page: 1,
       total_pages: 0,

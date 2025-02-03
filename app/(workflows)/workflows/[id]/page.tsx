@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback,  useState } from "react";
 import WorkflowDetailsHeader from "./components/workflowDetailsHeader";
 import GlobalLayout from "@/components/globals/GlobalLayout";
 import {
@@ -25,11 +25,11 @@ import { toast } from "sonner";
 import CommonNode from "./components/CommonNode";
 import { useWorkflowStore } from "@/app/store";
 import CustomEdge from "./components/CustomEdge";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import LoadingSpinner from "@/components/loaders/SpinnerLoader";
 
 function EditorPage() {
-  const router = useRouter();
+  
   const {
     draftState,
     addNode,
@@ -46,47 +46,6 @@ function EditorPage() {
   const [reactFlowInstance, setReactFlowInstance] =
     useState<ReactFlowInstance>();
 
-  const onInit = async () => {
-    try {
-      update({ loading: true, error: "" });
-      const response = await fetch(`/api/workflows/${id}`);
-      const data = await response.json();
-      if (response?.status === 404) {
-        toast.error(data.message);
-        router.push("/workflows");
-        return;
-      } else if (response?.status === 200) {
-        update({
-          workflowDetails: data?.workflow,
-          mainState: {
-            edges: data?.edges || [],
-            nodes: data?.nodes || [],
-          },
-          draftState: {
-            edges: data?.edges || [],
-            nodes: data?.nodes || [],
-          },
-        });
-      } else {
-        toast.error(data?.message || "Something went wrong");
-      }
-    } catch (e) {
-      console.log(e);
-      update({
-        error: "Something went wrong",
-      });
-    } finally {
-      update({ loading: false });
-    }
-  };
-
-  useEffect(() => {
-    if (id && workflowDetails?.id !== id) {
-      onInit();
-    } else {
-      update({ loading: false });
-    }
-  }, [id, workflowDetails?.name]);
 
   const handleClick = () => {
     setOpen(

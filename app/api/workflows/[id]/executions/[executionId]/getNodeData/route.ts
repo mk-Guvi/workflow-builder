@@ -32,17 +32,21 @@ export async function GET(
     });
 
     const outputData = await db.executions.findMany({
-      where: { executionId, nodeId: nodeId },
+      where: { executionId, nodeId:nodeData?.id },
+      select:{
+        status:true,
+        outputJson:true
+      }
     });
 
     return Response.json(
       {
         error: false,
         nodeData:{
-          ...nodeData,
-          data:JSON.parse(`${nodeData?.data}`)
+          ...JSON.parse(`${nodeData?.data}`),
+          outputData
         },
-        outputData,
+        
       },
       { status: 200 }
     );

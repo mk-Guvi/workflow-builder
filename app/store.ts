@@ -32,7 +32,6 @@ type StoreState = {
     executionsDetails: {
       nodes: AllNodesI[];
       edges: LinkI[];
-      nodesData: Record<string, AllNodesDataI>; 
     };
     current_page: number;
     total_pages: number;

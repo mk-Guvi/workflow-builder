@@ -24,7 +24,14 @@ function ExecutionsPage() {
 
   const getWorkflowHistoryDetails = async () => {
     try {
-      updateExecutionState({ detailError: "", detailLoading: true });
+      updateExecutionState({
+        detailError: "",
+        detailLoading: true,
+        executionsDetails: {
+          edges: [],
+          nodes: [],
+        },
+      });
       const response = await fetch(
         `/api/workflows/${id}/executions/${executionId}`
       );
@@ -35,7 +42,6 @@ function ExecutionsPage() {
           executionsDetails: {
             edges: data?.edges || [],
             nodes: data?.nodes || [],
-            nodesData: {},
           },
         });
       } else {
@@ -46,7 +52,6 @@ function ExecutionsPage() {
             executionsDetails: {
               edges: [],
               nodes: [],
-              nodesData: {},
             },
           });
         } else {
@@ -61,18 +66,13 @@ function ExecutionsPage() {
         executionsDetails: {
           edges: [],
           nodes: [],
-          nodesData: {},
         },
       });
     }
-
-  
-    
   };
 
   return (
     <div className="h-full w-full flex flex-col">
-      
       <WorkflowDetailsHeader />
       <GlobalLayout className="!p-0 flex-1 !h-full !overflow-auto">
         <ResizablePanelGroup direction="horizontal">

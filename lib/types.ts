@@ -8,31 +8,34 @@ export const WorkflowFormSchema = z.object({
 });
 
 export const NodeNameSchema = z.object({
-  name: z.string().trim().min(1, 'Required'),
-})
-
-
+  name: z.string().trim().min(1, "Required"),
+});
 
 export type TNodeTypes = "WEBHOOK_NODE" | "CODE_NODE" | "WEBHOOK_RESPONSE_NODE";
+export type TStatus = "PENDING" | "COMPLETED" | "FAILED";
 
-
-export type AllNodesDataI = WebhookNodeDataI | WebhookResponseNodeDataI | CodeNodeDataI;
+export type AllNodesDataI = {
+  outputData?: {
+    outputJson?: any;
+    status?: TStatus;
+  }[];
+} & (WebhookNodeDataI | WebhookResponseNodeDataI | CodeNodeDataI);
 
 export interface AllNodesI extends Node {
   id: string;
   type: TNodeTypes;
   position: { x: number; y: number };
   workflowNodeId?: string;
-  status?: "PENDING" | "COMPLETED" | "FAILED";
+  status?: TStatus;
   data: {
     label: string;
     icon?: string;
     color?: string;
-    description?: string; 
-  }
+    description?: string;
+  };
 }
 
-export interface CodeNodeDataI  {
+export interface CodeNodeDataI {
   parameters: {
     code: string;
     type: "JS";
@@ -42,7 +45,6 @@ export interface CodeNodeDataI  {
       isEnabled: boolean;
       maxTries: number;
       waitBetweenTries: number;
-
     };
     onError: "STOP" | "CONTINUE";
     notes: string;
@@ -78,8 +80,6 @@ export interface WebhookNodeDataI {
     notes: string;
   };
 }
-
-
 
 export interface LinkI extends Edge {
   id: string;
@@ -117,11 +117,10 @@ export type GetWorkflowsResponse = {
   };
 };
 
-
 export interface workflowHistoryT {
   id: string;
   workflowId: string;
-  status: "PENDING" | "COMPLETED" | "FAILED";
+  status: TStatus;
   createdAt: string;
   updatedAt: string;
   completedAt: string | null;

@@ -15,7 +15,20 @@ function EditorPageLayout({ children }: { children: React.ReactNode }) {
 
   const onInit = async () => {
     try {
-      update({ loading: true, error: "" });
+      update({
+        loading: true,
+        error: "",
+        workflowDetails: null,
+        mainState: {
+          edges: [],
+          nodes: [],
+        },
+        draftState: {
+          edges: [],
+          nodes: [],
+        },
+        nodesData: {},
+      });
       const response = await fetch(`/api/workflows/${id}`);
       const data = await response.json();
       if (response?.status === 404) {
@@ -33,6 +46,7 @@ function EditorPageLayout({ children }: { children: React.ReactNode }) {
             edges: data?.edges || [],
             nodes: data?.nodes || [],
           },
+          
         });
       } else {
         toast.error(data?.message || "Something went wrong");
@@ -51,7 +65,7 @@ function EditorPageLayout({ children }: { children: React.ReactNode }) {
     if (id && workflowDetails?.id !== id) {
       onInit();
     } else {
-      update({ loading: false });
+      update({ loading: false ,nodesData:{}});
     }
   }, [id, workflowDetails?.name]);
 

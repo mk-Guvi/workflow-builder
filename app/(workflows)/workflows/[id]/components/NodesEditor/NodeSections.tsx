@@ -67,14 +67,14 @@ function NodeSections() {
       }
       const response = await fetch(url);
       const data = await response.json();
-      
+      console.log({data},"data")
       if (data?.error === false) {
         setState({
           loading: false,
           error: "",
         });
         updateNodeData(`${nodeData?.id}`, {
-          ...(executionId ? data?.nodeData?.data : data?.data),
+          ...(executionId ? data?.nodeData : data?.data),
         });
       } else {
         if (data?.message) {
@@ -120,7 +120,7 @@ function NodeSections() {
       <TabsContent value="settings" className="w-full p-3 flex-1 overflow-auto">
         {state?.error ? (
           <div className="flex items-center justify-center h-full text-red-500 font-bold text-center">
-            {state.error}{" "}
+            {state.error}
           </div>
         ) : state?.loading ? null : (
           SettingsView && <SettingsView />

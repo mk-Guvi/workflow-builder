@@ -12,6 +12,8 @@ import Header from "./Header";
 import NodeNameEditor from "./NodeNameEditor";
 import NodeSections from "./NodeSections";
 import NodeInputDataView from "./NodeInputDataView";
+import { useNodesEditor } from "../../hooks";
+import { useWorkflowStore } from "@/app/store";
 
 const CustomHandle = ({ disabled }: { disabled: boolean }) =>
   disabled ? null : (
@@ -25,11 +27,13 @@ const CustomHandle = ({ disabled }: { disabled: boolean }) =>
       </div>
     </ResizableHandle>
   );
-  
+
 function NodesEditor() {
   const { setClose } = useDrawer();
   const [fullScreenView, setFullScreenView] = useState("");
-
+  const { nodeData } = useNodesEditor();
+  const { nodesData } = useWorkflowStore();
+  console.log(nodeData, "nodeda");
   const selectedFullView = useMemo(() => {
     return {
       OUTPUT: fullScreenView === "OUTPUT",
@@ -41,6 +45,10 @@ function NodesEditor() {
   const onChangeScreen = useCallback((value: "OUTPUT" | "NODE" | "INPUT") => {
     setFullScreenView((prev) => (prev === value ? "" : value));
   }, []);
+
+  const getOutputData=useMemo(()=>{
+   return nodeData?.id ? nodesData?.[nodeData?.id]?.outputData?.map(d=>d.outputJson) : ""
+  },[nodesData,nodeData?.id])
 
   return (
     <main className="flex h-full w-full flex-col gap-4 pt-3 overflow-y-auto">
@@ -94,7 +102,9 @@ function NodesEditor() {
               title="Output"
               isFullScreen={selectedFullView.OUTPUT}
             ></Header>
-            <NodeDataView data={""} />
+            <NodeDataView
+              data={getOutputData}
+            />
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>

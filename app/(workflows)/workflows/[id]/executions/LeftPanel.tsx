@@ -159,7 +159,7 @@ function LeftPanel() {
             {listError}
           </h1>
         ) : (
-          executions.map((each, i) => {
+          executions?.length?executions.map((each, i) => {
             return (
               <WorkflowHistoryCard
                 key={`${each.id} - ${i}`}
@@ -167,7 +167,7 @@ function LeftPanel() {
                 item={each}
               />
             );
-          })
+          }):<div className="h-full w-full flex items-center font-semibold justify-center">No Executions Found</div>
         )}
       </main>
     </div>

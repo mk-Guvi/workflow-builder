@@ -6,7 +6,7 @@ import { getCurrentUTC } from "@/lib/utils";
 import { runJsScript } from "./services/CodeNodeServices";
 import { createResponse, getValidConnectedNodes } from "./helpers";
 
-export async function handler(
+async function handler(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {

@@ -25,7 +25,7 @@ const SettingsRenderer: Record<TNodeTypes, React.FC> = {
 
 function NodeSections() {
   const { nodeData, executionId } = useNodesEditor();
-  const { nodesData, updateNodeData, workflowDetails, executionState } =
+  const { nodesData, updateNodeData, workflowDetails, } =
     useWorkflowStore();
   const ParamsView = (nodeData?.type && ParamsRenderer[nodeData?.type]) || null;
   const SettingsView =

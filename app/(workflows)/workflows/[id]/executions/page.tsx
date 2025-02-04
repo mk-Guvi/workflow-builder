@@ -9,6 +9,7 @@ import CustomEdge from "../components/CustomEdge";
 import LeftPanel from "./LeftPanel";
 import { useWorkflowStore } from "@/app/store";
 import { useParams, useSearchParams } from "next/navigation";
+import LoadingSpinner from "@/components/loaders/SpinnerLoader";
 
 function ExecutionsPage() {
   const { updateExecutionState, executionState } = useWorkflowStore();
@@ -80,6 +81,7 @@ function ExecutionsPage() {
             <LeftPanel />
           </ResizablePanel>
           <ResizablePanel className="border-l" defaultSize={75}>
+            <LoadingSpinner isLoading={executionState.detailLoading} />
             <ReactFlow
               nodes={executionState.executionsDetails.nodes}
               edgeTypes={{

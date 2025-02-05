@@ -102,7 +102,7 @@ export function NodeSelector() {
                   className="text-xs "
                   key={each.id}
                   value={each.id}
-                  onSelect={(currentValue) => {
+                  onSelect={() => {
                     update({
                       nodeInputView: each.id,
                     });

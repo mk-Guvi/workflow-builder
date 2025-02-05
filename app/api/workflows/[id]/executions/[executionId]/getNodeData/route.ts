@@ -44,7 +44,7 @@ export async function GET(
         outputJson:true
       }
     });
-console.log(nodeData,"nodeData")
+
     return Response.json(
       {
         error: false,

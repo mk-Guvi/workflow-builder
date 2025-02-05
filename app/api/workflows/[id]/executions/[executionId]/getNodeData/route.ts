@@ -31,6 +31,12 @@ export async function GET(
       where: { executionId, workflowNodeId: nodeId },
     });
 
+    if (!nodeData) {
+      return Response.json(
+        { error: true, message: "Node not found" },
+        { status: 404 }
+      );
+    }
     const outputData = await db.executions.findMany({
       where: { executionId, nodeId:nodeData?.id },
       select:{
@@ -38,7 +44,7 @@ export async function GET(
         outputJson:true
       }
     });
-
+console.log(nodeData,"nodeData")
     return Response.json(
       {
         error: false,

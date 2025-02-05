@@ -11,6 +11,7 @@ type StoreState = {
   showSave: boolean;
   loading: boolean;
   error: string;
+  nodeInputView: string;
   selectedNode: string;
   workflowDetails: Workflow | null;
   nodesData: Record<string, AllNodesDataI>;
@@ -54,6 +55,7 @@ type Store = StoreState & {
 export const useWorkflowStore = create<Store>((set) => {
   return {
     showSave: false,
+    nodeInputView: "",
     loading: true,
     error: "",
     selectedNode: "",

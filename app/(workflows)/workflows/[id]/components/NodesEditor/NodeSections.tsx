@@ -10,6 +10,7 @@ import CodeNodeParameter from "./ParamsAndSettings/CodeNode/CodeNodeParameter";
 import CodeNodeSettings from "./ParamsAndSettings/CodeNode/CodeNodeSettings";
 import LoadingSpinner from "@/components/loaders/SpinnerLoader";
 import { useWorkflowStore } from "@/app/store";
+import { getNodeData } from "../../utils";
 
 const ParamsRenderer: Record<TNodeTypes, React.FC> = {
   WEBHOOK_NODE: WebhookNodeParameter,
@@ -25,8 +26,7 @@ const SettingsRenderer: Record<TNodeTypes, React.FC> = {
 
 function NodeSections() {
   const { nodeData, executionId } = useNodesEditor();
-  const { nodesData, updateNodeData, workflowDetails, } =
-    useWorkflowStore();
+  const { nodesData, updateNodeData, workflowDetails } = useWorkflowStore();
   const ParamsView = (nodeData?.type && ParamsRenderer[nodeData?.type]) || null;
   const SettingsView =
     (nodeData?.type && SettingsRenderer[nodeData?.type]) || null;
@@ -46,55 +46,35 @@ function NodeSections() {
           error: "",
         });
       } else {
-        getNodeData();
+        callNodeData();
       }
     }
   }, [nodeData]);
 
-  const getNodeData = async () => {
-    try {
-      setState({
-        loading: true,
-        error: "",
-      });
-      let url = `/api/workflows/${workflowDetails?.id}`;
-      if (executionId) {
-        url = `${url}/executions/${executionId}/getNodeData?nodeId=${
-          nodeData?.workflowNodeId || ""
-        }`;
-      } else {
-        url = `${url}/getNodeData?nodeId=${nodeData?.id}`;
-      }
-      const response = await fetch(url);
-      const data = await response.json();
-      console.log({data},"data")
-      if (data?.error === false) {
-        setState({
-          loading: false,
-          error: "",
-        });
-        updateNodeData(`${nodeData?.id}`, {
-          ...(executionId ? data?.nodeData : data?.data),
-        });
-      } else {
-        if (data?.message) {
-          setState({
-            loading: false,
-            error: data?.message,
-          });
-        } else {
-          throw new Error("Something went wrong : Getting Node Data");
-        }
-      }
-    } catch (e) {
-      console.log(e);
+  const callNodeData = async () => {
+    setState({
+      loading: true,
+      error: "",
+    });
+    const result = await getNodeData({
+      workflowId: workflowDetails?.id || "",
+      executionId: executionId || "",
+      nodeId: executionId?nodeData?.workflowNodeId||'':nodeData?.id || "",
+    });
+    if (result?.error === false) {
       setState({
         loading: false,
-        error: "Something went wrong",
+        error: "",
+      });
+      updateNodeData(`${nodeData?.id}`, result?.data);
+    } else {
+      setState({
+        loading: false,
+        error: result?.message,
       });
     }
   };
-  
+
   return (
     <Tabs
       defaultValue="parameters"

@@ -56,3 +56,45 @@ export const CodeNodeSettingsSchema = z.object({
   onError: z.enum(["STOP", "CONTINUE"],{ required_error: "Required" }).default("STOP"),
   notes: z.string().trim(),
 })
+
+
+export const  getNodeData = async ({workflowId, executionId, nodeId}: {workflowId: string, executionId: string, nodeId: string}) => {
+  try {
+    
+    let url = `/api/workflows/${workflowId}`;
+    if (executionId) {
+      url = `${url}/executions/${executionId}/getNodeData?nodeId=${
+        nodeId || ""
+      }`;
+    } else {
+      url = `${url}/getNodeData?nodeId=${nodeId}`;
+    }
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    if (data?.error === false) {
+      
+      return {
+        error: false,
+        data: executionId ? data?.nodeData : data?.data,
+      }
+    } else {
+      if (data?.message) {
+        return {
+          error: true,
+          data: null,
+          message: data?.message,
+        };
+      } else {
+        throw new Error("Something went wrong : Getting Node Data");
+      }
+    }
+  } catch (e) {
+    console.log(e);
+    return {
+      error: true,
+      data: null,
+      message: "Something went wrong",
+    };
+  }
+};

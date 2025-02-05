@@ -40,17 +40,16 @@ export default function DrawerComponent({
   const handleClose = () => setClose();
 
   useEffect(() => {
-    console.log({pathname})
-    if(isOpen){
-handleClose();
+    if (isOpen) {
+      handleClose();
     }
   }, [pathname]);
+
   useEffect(() => {
     window.requestAnimationFrame(() => {
-      document.body.style.pointerEvents = isOpen ? "auto" : "none";
+      document.body.style.pointerEvents = isOpen ? "none" : "auto";
     });
   }, [isOpen]);
-
 
   if (isDesktop) {
     return (
@@ -77,18 +76,26 @@ handleClose();
             }
           >
             <div className="bg-zinc-50 h-full w-full grow p-5 flex overflow-auto flex-col rounded-[16px]">
-              <VaulDrawer.Title hidden={hideHeader} className="font-medium text-zinc-900">
+              <VaulDrawer.Title
+                hidden={hideHeader}
+                className="font-medium text-zinc-900"
+              >
                 {title}
               </VaulDrawer.Title>
-              
-              <VaulDrawer.Description hidden={hideHeader} className="text-zinc-600">
+
+              <VaulDrawer.Description
+                hidden={hideHeader}
+                className="text-zinc-600"
+              >
                 {subheading}
               </VaulDrawer.Description>
 
-              <div className={clsx(
-                "flex-1 overflow-auto w-full h-full",
-                !hideHeader && (title || subheading) ? "" : "-mt-2"
-              )}>
+              <div
+                className={clsx(
+                  "flex-1 overflow-auto w-full h-full",
+                  !hideHeader && (title || subheading) ? "" : "-mt-2"
+                )}
+              >
                 {children}
               </div>
             </div>
@@ -106,12 +113,16 @@ handleClose();
             <div className="flex justify-between items-center">
               <div>
                 {title && <DrawerTitle>{title}</DrawerTitle>}
-                {subheading && <DrawerDescription>{subheading}</DrawerDescription>}
+                {subheading && (
+                  <DrawerDescription>{subheading}</DrawerDescription>
+                )}
               </div>
             </div>
           </DrawerHeader>
         )}
-        <div className={clsx(!hideHeader && (title || subheading) ? "" : "mt-4")}>
+        <div
+          className={clsx(!hideHeader && (title || subheading) ? "" : "mt-4")}
+        >
           {children}
         </div>
         <DrawerFooter className="pt-2">

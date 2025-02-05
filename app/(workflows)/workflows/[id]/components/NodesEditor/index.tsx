@@ -33,7 +33,7 @@ function NodesEditor() {
   const [fullScreenView, setFullScreenView] = useState("");
   const { nodeData } = useNodesEditor();
   const { nodesData } = useWorkflowStore();
-  console.log(nodeData, "nodeda");
+  
   const selectedFullView = useMemo(() => {
     return {
       OUTPUT: fullScreenView === "OUTPUT",

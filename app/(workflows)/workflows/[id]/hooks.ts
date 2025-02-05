@@ -1,13 +1,14 @@
 import { useWorkflowStore } from "@/app/store";
 import { AllNodesDataI, AllNodesI } from "@/lib/types";
 import { useSearchParams } from "next/navigation";
-import { useCallback,  useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 export const useNodesEditor = () => {
   
   const searchParams = useSearchParams();
   const executionId = searchParams.get("e_id");
+  
   const {
     selectedNode,
     draftState,
@@ -123,6 +124,13 @@ export const useNodesEditor = () => {
   const getPrevNodes = useMemo((): AllNodesI[] => {
     const visited = new Set<string>();
     const result: AllNodesI[] = [];
+    const currentNodes= executionId
+      ? executionState?.executionsDetails?.nodes
+      : draftState.nodes;
+    const currentEdges= executionId
+      ? executionState?.executionsDetails?.edges
+      : draftState.edges;
+    
 
     // Recursive function to traverse parent nodes
     const traverse = (nodeId: string) => {
@@ -131,13 +139,13 @@ export const useNodesEditor = () => {
       visited.add(nodeId);
 
       // Find all edges pointing to the current node
-      const incomingEdges = draftState.edges.filter(
+      const incomingEdges = currentEdges.filter(
         (edge) => edge.target === nodeId
       );
 
       incomingEdges.forEach((edge) => {
         // Find the source node for the current edge
-        const sourceNode = draftState.nodes.find(
+        const sourceNode = currentNodes.find(
           (node) => node.id === edge.source
         );
         if (sourceNode) {
@@ -151,7 +159,7 @@ export const useNodesEditor = () => {
     traverse(selectedNode);
 
     return result;
-  }, [draftState, selectedNode]);
+  }, [draftState, selectedNode,executionId]);
 
   const onDeleteNode = useCallback(
     async (nodeId: string) => {

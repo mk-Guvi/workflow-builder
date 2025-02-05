@@ -12,12 +12,22 @@ import { useParams, useSearchParams } from "next/navigation";
 import LoadingSpinner from "@/components/loaders/SpinnerLoader";
 
 function ExecutionsPage() {
-  const { updateExecutionState, executionState } = useWorkflowStore();
+  const { updateExecutionState, executionState, update } = useWorkflowStore();
   const searchParams = useSearchParams();
   const executionId = searchParams.get("e_id");
   const { id } = useParams();
 
   useEffect(() => {
+    update({
+      nodesData: {},
+    });
+    updateExecutionState({
+      detailError: "",
+      executionsDetails: {
+        edges: [],
+        nodes: [],
+      },
+    });
     if (executionId && id) {
       getWorkflowHistoryDetails();
     }
@@ -26,12 +36,7 @@ function ExecutionsPage() {
   const getWorkflowHistoryDetails = async () => {
     try {
       updateExecutionState({
-        detailError: "",
         detailLoading: true,
-        executionsDetails: {
-          edges: [],
-          nodes: [],
-        },
       });
       const response = await fetch(
         `/api/workflows/${id}/executions/${executionId}`
@@ -80,7 +85,7 @@ function ExecutionsPage() {
           <ResizablePanel defaultSize={25}>
             <LeftPanel />
           </ResizablePanel>
-          <ResizablePanel className="border-l" defaultSize={75}>
+          <ResizablePanel className="border-l relative" defaultSize={75}>
             <LoadingSpinner isLoading={executionState.detailLoading} />
             <ReactFlow
               nodes={executionState.executionsDetails.nodes}

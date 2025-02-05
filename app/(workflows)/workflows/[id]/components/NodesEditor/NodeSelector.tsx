@@ -19,17 +19,62 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useNodesEditor } from "../../hooks";
-
+import { useWorkflowStore } from "@/app/store";
+import { getNodeData } from "../../utils";
 
 export function NodeSelector() {
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
-  const { getPrevNodes } = useNodesEditor();
+
+  const { getPrevNodes, executionId } = useNodesEditor();
+  const {
+    nodeInputView,
+    nodesData,
+    update,
+    executionState,
+    workflowDetails,
+    updateNodeData,
+  } = useWorkflowStore();
 
   const updatedValue = React.useMemo(() => {
-    const findNode = getPrevNodes.find((each) => each.id === value);
+    const findNode = getPrevNodes.find((each) => each.id === nodeInputView);
     return findNode?.data?.label || "Select node";
-  }, [value, getPrevNodes]);
+  }, [nodeInputView, getPrevNodes]);
+
+  React.useEffect(() => {
+    if (getPrevNodes?.length > 0) {
+      update({
+        nodeInputView: getPrevNodes[0].id,
+      });
+    } else {
+      update({
+        nodeInputView: "",
+      });
+    }
+  }, [getPrevNodes]);
+
+  React.useEffect(() => {
+    if (!nodesData?.[nodeInputView]?.parameters && nodeInputView) {
+      callNodeData();
+    }
+  }, [nodeInputView, nodesData]);
+
+  const callNodeData = async () => {
+    const findNodeDetails = executionState?.executionsDetails?.nodes?.find(
+      (d) => d?.id === nodeInputView
+    );
+
+    if (!findNodeDetails) {
+      return;
+    }
+    const result = await getNodeData({
+      workflowId: workflowDetails?.id || "",
+      executionId: executionId || "",
+      nodeId: findNodeDetails?.workflowNodeId || "",
+    });
+    if (result?.error === false) {
+      updateNodeData(`${nodeInputView}`, result?.data);
+    }
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -38,9 +83,11 @@ export function NodeSelector() {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[200px] text-xs justify-between"
+          className="w-[200px] text-xs text-left"
         >
-          {updatedValue}
+          <p title={updatedValue} className="text-xs truncate flex-1">
+            {updatedValue}
+          </p>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -52,18 +99,20 @@ export function NodeSelector() {
             <CommandGroup>
               {getPrevNodes.map((each) => (
                 <CommandItem
-                  className="text-xs"
+                  className="text-xs "
                   key={each.id}
                   value={each.id}
                   onSelect={(currentValue) => {
-                    setValue(currentValue === value ? "" : currentValue);
+                    update({
+                      nodeInputView: each.id,
+                    });
                     setOpen(false);
                   }}
                 >
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      value === each.id ? "opacity-100" : "opacity-0"
+                      nodeInputView === each.id ? "opacity-100" : "opacity-0"
                     )}
                   />
                   {each.data.label}

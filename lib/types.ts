@@ -32,6 +32,7 @@ export interface AllNodesI extends Node {
     icon?: string;
     color?: string;
     description?: string;
+    statusCounts?: Record<TStatus, number>;
   };
 }
 

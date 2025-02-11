@@ -1,5 +1,5 @@
 import { CodeNodeDataI } from "@/lib/types";
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 
 import { useWorkflowStore } from "@/app/store";
 import { Form } from "@/components/ui/form";
@@ -35,7 +35,7 @@ const typeOptions = [
 
 function CodeNodeParameter() {
   const { nodesData, selectedNode } = useWorkflowStore();
-  const { updateNodeParams, executionId } = useNodesEditor();
+  const { updateNodeParams, executionId,getPrevNodes } = useNodesEditor();
   const { setIsDisabled, isDisabled } = useDrawer();
   const params = nodesData?.[selectedNode]
     ?.parameters as CodeNodeDataI["parameters"];
@@ -48,6 +48,10 @@ function CodeNodeParameter() {
       code: params?.code || "",
     },
   });
+
+  const prevNodes = useMemo(() => {
+    return getPrevNodes.map((each) => each.data?.label || "");
+  }, [getPrevNodes]);
 
   const onSubmit = useCallback(
     async (data: z.infer<typeof CodeNodeParamsSchema>) => {
@@ -110,11 +114,11 @@ function CodeNodeParameter() {
             name="code"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm">Response Value</FormLabel>
+                <FormLabel className="text-sm">Code</FormLabel>
                 <FormControl>
                   <CodeEditor
                     type={form.watch("type")}
-                    nodes={["responseValue"]}
+                    nodes={prevNodes}
                     value={field.value}
                     onChange={field.onChange}
                   />

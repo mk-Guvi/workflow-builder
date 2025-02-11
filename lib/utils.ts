@@ -48,3 +48,14 @@ export function getDateDifference({ fromDate, toDate, timeZone }: { fromDate: st
 export const getCurrentUTC = (): string => {
   return moment.utc().format();
 };
+
+
+export   function isJsonValue(value: unknown): boolean {
+  if (value === null) return true;
+  if (['string', 'number', 'boolean'].includes(typeof value)) return true;
+  if (Array.isArray(value)) return value.every(isJsonValue);
+  if (typeof value === 'object') {
+    return Object.values(value as object).every(isJsonValue);
+  }
+  return false;
+}

@@ -126,3 +126,7 @@ export interface workflowHistoryT {
   updatedAt: string;
   completedAt: string | null;
 }
+
+
+
+export  type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };

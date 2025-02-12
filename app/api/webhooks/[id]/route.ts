@@ -216,19 +216,12 @@ async function handler(
               const executionOptions = {
                 timeout: nodeData.settings?.timeout || 10000,
               };
-              let d=''
-              try{
-                d=JSON.parse(result.data);
-              }catch(e){
-                console.log(e)
-                d=result.data
-              }
 
               const { logs, data, error, executionTime } = await runJsScript(
-                d,
+                result.data,
                 executionOptions
               );
-              console.log({ data, error, code: result.data });
+            
               if (error) {
                 throw new Error(error);
               }

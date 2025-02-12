@@ -2,8 +2,6 @@
 
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { ExecutionStatus } from "@prisma/client";
-import { isJsonValue } from "@/lib/utils";
 import { JsonValue } from "@/lib/types";
 
 // Helper function to validate node connections
@@ -109,10 +107,8 @@ interface NodeMatch {
 export const getParsedValues = async ({
   executionId,
   code,
-}: GetParsedValuesInput): Promise<{error:string, data:string,}> => {
+}: GetParsedValuesInput): Promise<{error:string, data:string}> => {
   try {
-    
-
     // 1. Pattern matching with proper type handling
     const pattern =
       /\$\(['"]([^'"]+)['"]\)\.(currentItem|firstItem|lastItem|all)\.json/g;
@@ -120,12 +116,11 @@ export const getParsedValues = async ({
 
     if (matchResults.length === 0) {
       return {
-        error:'',
-        data:code,
+        error: '',
+        data: code,
       };
     }
 
-    // Transform matches into strongly-typed objects
     // Transform matches into strongly-typed objects
     const matches: NodeMatch[] = matchResults.map((match) => ({
       fullMatch: match[0],
@@ -137,7 +132,7 @@ export const getParsedValues = async ({
     const nodeNamesSet = new Set(matches.map((m) => m.nodeName));
     const nodeNames = Array.from(nodeNamesSet);
 
-    // 3. First, get execution nodes for the current execution that match the node names
+    // 3. Get execution nodes
     const executionNodes = await db.executionNodes.findMany({
       where: {
         executionId: executionId,
@@ -150,7 +145,7 @@ export const getParsedValues = async ({
         label: true,
         executions: {
           where: {
-            status: ExecutionStatus.COMPLETED,
+            status: "COMPLETED",
           },
           orderBy: {
             createdAt: "asc",
@@ -164,7 +159,7 @@ export const getParsedValues = async ({
       },
     });
 
-    // 4. Create a map of node label to executions for easy lookup
+    // 4. Create node map
     const nodeMap = new Map<
       string,
       Array<{
@@ -172,7 +167,7 @@ export const getParsedValues = async ({
         executions: Array<{
           outputJson: JsonValue;
           createdAt: Date;
-          status: ExecutionStatus;
+          status: string;
         }>;
       }>
     >();
@@ -208,21 +203,48 @@ export const getParsedValues = async ({
             case "lastItem": {
               const lastExecution = executions[executions.length - 1];
               if (lastExecution?.outputJson != null) {
-                values.push(lastExecution.outputJson);
+                // Safely handle both string and object outputs
+                if (typeof lastExecution.outputJson === 'string') {
+                  try {
+                    values.push(JSON.parse(lastExecution.outputJson));
+                  } catch {
+                    values.push(lastExecution.outputJson);
+                  }
+                } else {
+                  values.push(lastExecution.outputJson);
+                }
               }
               break;
             }
             case "firstItem": {
               const firstExecution = executions[0];
               if (firstExecution?.outputJson != null) {
-                values.push(firstExecution.outputJson);
+                // Safely handle both string and object outputs
+                if (typeof firstExecution.outputJson === 'string') {
+                  try {
+                    values.push(JSON.parse(firstExecution.outputJson));
+                  } catch {
+                    values.push(firstExecution.outputJson);
+                  }
+                } else {
+                  values.push(firstExecution.outputJson);
+                }
               }
               break;
             }
             case "all": {
               const validExecutions = executions
                 .filter((e) => e.outputJson != null)
-                .map((e) => e.outputJson);
+                .map((e) => {
+                  if (typeof e.outputJson === 'string') {
+                    try {
+                      return JSON.parse(e.outputJson);
+                    } catch {
+                      return e.outputJson;
+                    }
+                  }
+                  return e.outputJson;
+                });
               values.push(...validExecutions);
               break;
             }
@@ -244,15 +266,14 @@ export const getParsedValues = async ({
     }
 
     return {
-      error:"",
-      data:parsedCode
+      error: "",
+      data: parsedCode
     };
   } catch (error) {
     console.log(error);
-
     return {
       error: JSON.stringify(error),
       data: '',
-    }
+    };
   }
 };

@@ -1,10 +1,14 @@
 import { db } from "@/lib/db";
 import { NextRequest } from "next/server";
-import { executionNodes, Prisma } from "@prisma/client";
+import { executionNodes, executions, Prisma } from "@prisma/client";
 import { WebhookNodeDataI, WebhookResponseNodeDataI } from "@/lib/types";
 import { getCurrentUTC } from "@/lib/utils";
 import { runJsScript } from "./services/CodeNodeServices";
-import { createResponse, getValidConnectedNodes } from "./helpers";
+import {
+  createResponse,
+  getParsedValues,
+  getValidConnectedNodes,
+} from "./helpers";
 
 async function handler(
   req: NextRequest,
@@ -126,7 +130,7 @@ async function handler(
 
     if (!webhookExecutionNode) {
       await db.executionsHistory.update({
-        where: { id: executionHistory.id },
+        where: { id: executionId },
         data: { status: "FAILED", completedAt: getCurrentUTC() },
       });
       return createResponse({
@@ -175,6 +179,7 @@ async function handler(
     let lastWebhookResponseData: WebhookResponseNodeDataI | undefined;
 
     while (currentNode) {
+      let currentExecution: executions | undefined = webhookExecution;
       try {
         // Move to next node
         const nextEdge = executionEdges.find(
@@ -200,18 +205,30 @@ async function handler(
               executionId,
             },
           });
-
+          currentExecution = newExecution;
           switch (currentNode.type) {
             case "CODE_NODE":
               const code = nodeData.parameters?.code || "";
+              const result= await getParsedValues({ code, executionId });
+              if(result.error){
+                throw new Error(result.error);
+              }
               const executionOptions = {
                 timeout: nodeData.settings?.timeout || 10000,
               };
+              let d=''
+              try{
+                d=JSON.parse(result.data);
+              }catch(e){
+                console.log(e)
+                d=result.data
+              }
 
               const { logs, data, error, executionTime } = await runJsScript(
-                code,
+                d,
                 executionOptions
               );
+              console.log({ data, error, code: result.data });
               if (error) {
                 throw new Error(error);
               }
@@ -221,13 +238,18 @@ async function handler(
                 result: data,
                 executionTime,
               };
+              
               break;
 
             case "WEBHOOK_RESPONSE_NODE":
               lastWebhookResponseNode = currentNode;
               lastWebhookResponseData = nodeData as WebhookResponseNodeDataI;
+              const parsedResponse= await getParsedValues({ code:nodeData.parameters?.responseValue, executionId });
+              if(parsedResponse.error){
+                throw new Error(parsedResponse.error);
+              }
               outputJson = {
-                responseValue: nodeData.parameters?.responseValue || "OK",
+                responseValue: parsedResponse.data || "",
                 responseCode: nodeData.parameters?.responseCode || 200,
                 responseHeaders: nodeData.parameters?.responseHeaders || [],
               };
@@ -241,7 +263,7 @@ async function handler(
           }
 
           await db.executions.update({
-            where: { id: newExecution.id, nodeId: currentNode?.id },
+            where: { id: currentExecution.id, nodeId: currentNode?.id },
             data: {
               status: "COMPLETED",
               outputJson,
@@ -250,9 +272,9 @@ async function handler(
           });
         }
       } catch (error) {
-        if (currentNode?.id) {
+        if (currentExecution?.id) {
           await db.executions.update({
-            where: { id: webhookExecution.id, nodeId: currentNode?.id },
+            where: { id: currentExecution.id, },
             data: {
               status: "FAILED",
               outputJson: { error: JSON.stringify(error) },
@@ -308,7 +330,6 @@ async function handler(
     if (webhookNodeData.parameters?.respondType === "LAST_NODE") {
       return createResponse({
         error: false,
-
         data: outputJson || {},
       });
     }

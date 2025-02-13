@@ -82,8 +82,16 @@ export function createResponse({
   };
 
   if (message) response.message = message;
-  if (data) response.data = data;
-  if (errorData) response.errorData = JSON.stringify(errorData);
+  if (data) {
+    try {
+      response.data = JSON.parse(data);
+    } catch {
+      response.data = data;
+    }
+  }
+  if (errorData) {
+    response.errorData = errorData;
+  }
 
   return NextResponse.json(response, { status, headers });
 }
@@ -107,7 +115,7 @@ interface NodeMatch {
 export const getParsedValues = async ({
   executionId,
   code,
-}: GetParsedValuesInput): Promise<{error:string, data:string}> => {
+}: GetParsedValuesInput): Promise<{ error: string; data: string }> => {
   try {
     // 1. Pattern matching with proper type handling
     const pattern =
@@ -116,7 +124,7 @@ export const getParsedValues = async ({
 
     if (matchResults.length === 0) {
       return {
-        error: '',
+        error: "",
         data: code,
       };
     }
@@ -204,7 +212,7 @@ export const getParsedValues = async ({
               const lastExecution = executions[executions.length - 1];
               if (lastExecution?.outputJson != null) {
                 // Safely handle both string and object outputs
-                if (typeof lastExecution.outputJson === 'string') {
+                if (typeof lastExecution.outputJson === "string") {
                   try {
                     values.push(JSON.parse(lastExecution.outputJson));
                   } catch {
@@ -220,7 +228,7 @@ export const getParsedValues = async ({
               const firstExecution = executions[0];
               if (firstExecution?.outputJson != null) {
                 // Safely handle both string and object outputs
-                if (typeof firstExecution.outputJson === 'string') {
+                if (typeof firstExecution.outputJson === "string") {
                   try {
                     values.push(JSON.parse(firstExecution.outputJson));
                   } catch {
@@ -236,7 +244,7 @@ export const getParsedValues = async ({
               const validExecutions = executions
                 .filter((e) => e.outputJson != null)
                 .map((e) => {
-                  if (typeof e.outputJson === 'string') {
+                  if (typeof e.outputJson === "string") {
                     try {
                       return JSON.parse(e.outputJson);
                     } catch {
@@ -267,13 +275,13 @@ export const getParsedValues = async ({
 
     return {
       error: "",
-      data: parsedCode
+      data: parsedCode,
     };
   } catch (error) {
     console.log(error);
     return {
       error: JSON.stringify(error),
-      data: '',
+      data: "",
     };
   }
 };

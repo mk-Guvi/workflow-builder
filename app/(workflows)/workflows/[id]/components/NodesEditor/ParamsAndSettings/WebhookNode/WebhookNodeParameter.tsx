@@ -25,6 +25,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useNodesEditor } from "../../../../hooks";
 import { useDrawer } from "@/app/providers/drawerProvider";
+import { toast } from "sonner";
 
 const methodOptions = ["GET", "POST"];
 const respondTypeOptions = [
@@ -49,6 +50,7 @@ function WebhookNodeParameter() {
   const params = nodesData?.[selectedNode]
     ?.parameters as WebhookNodeDataI["parameters"];
 
+
   const form = useForm<z.infer<typeof WebhookNodeParamsSchema>>({
     mode: "all",
     resolver: zodResolver(WebhookNodeParamsSchema),
@@ -59,7 +61,7 @@ function WebhookNodeParameter() {
     },
   });
 
-
+const path=form.watch("path");
 
   const onSubmit = useCallback(
     async (data: z.infer<typeof WebhookNodeParamsSchema>) => {
@@ -74,7 +76,15 @@ function WebhookNodeParameter() {
     [selectedNode, updateNodeParams]
   );
 
-
+const onCopy=()=>{
+  navigator.clipboard.writeText(`${window.location.origin}/api/webhooks/${path}`)
+  .then(() => {
+    toast.success("Copied to clipboard")
+  })
+  .catch((err) => {
+    console.log(err);
+  })
+}
   return (
     <Form {...form}>
       <form
@@ -82,6 +92,7 @@ function WebhookNodeParameter() {
         className="flex flex-col text-xs gap-2 h-full w-full"
       >
         <div className="flex flex-col gap-2 px-1 h-full w-full overflow-auto">
+          <p className="text-[10px] text-center text-gray-500 bg-gray-100 p-2 px-4 rounded-full cursor-copy" onClick={onCopy}>{window.location.origin}/webhooks/{path}</p>
           <FormField
             control={form.control}
             name="path"

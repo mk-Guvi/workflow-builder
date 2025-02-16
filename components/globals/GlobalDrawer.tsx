@@ -47,7 +47,7 @@ export default function DrawerComponent({
 
   useEffect(() => {
     window.requestAnimationFrame(() => {
-      document.body.style.pointerEvents = isOpen ? "none" : "auto";
+      document.body.style.pointerEvents = "auto"
     });
   }, [isOpen]);
 

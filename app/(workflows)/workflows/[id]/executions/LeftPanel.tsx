@@ -92,7 +92,7 @@ function LeftPanel() {
   return (
     <div className="h-full  w-full flex flex-col">
       {total_pages >= 1 ? (
-        <header className="flex items-center justify-between border-b p-3  gap-1">
+        <header className="flex items-center border-b text-xs p-3 flex-wrap sm:flex-nowrap  gap-2">
           <Button
             disabled={current_page <= 1}
             onClick={() => {
@@ -100,28 +100,28 @@ function LeftPanel() {
               recordChanges();
             }}
             variant={"outline"}
-            size={"sm"}
+            size={"xs"}
           >
             <ChevronLeftSquareIcon />
           </Button>
-          <div className="flex items-center gap-2">
-            <Input
-              className="max-w-[4rem]"
-              onChange={(e) => {
-                const value = parseInt(e.target.value);
-                if (value < 1 || value > total_pages) return;
-                updateExecutionState({ current_page: value });
-                recordChanges();
-              }}
-              value={current_page}
-              type="number"
-            />
-            <span>/ {total_pages}</span>
-          </div>
+
+          <Input
+            className="max-w-[3rem] h-7"
+            onChange={(e) => {
+              const value = parseInt(e.target.value);
+              if (value < 1 || value > total_pages) return;
+              updateExecutionState({ current_page: value });
+              recordChanges();
+            }}
+            value={current_page}
+            type="number"
+          />
+          <div>/ {total_pages}</div>
+
           <Button
             disabled={current_page >= total_pages}
             variant={"outline"}
-            size={"sm"}
+            size={"xs"}
             onClick={() => {
               updateExecutionState({ current_page: current_page + 1 });
               recordChanges();
@@ -130,7 +130,7 @@ function LeftPanel() {
             <ChevronRightSquareIcon />
           </Button>
           <Select value={`${page_size}`} onValueChange={onChangePageSize}>
-            <SelectTrigger className="w-[70px]">
+            <SelectTrigger className="w-[65px] h-7">
               <SelectValue placeholder="page size" />
             </SelectTrigger>
             <SelectContent>
@@ -145,7 +145,7 @@ function LeftPanel() {
             disabled={listLoading}
             onClick={recordChanges}
             variant={"outline"}
-            size={"sm"}
+            size={"xs"}
           >
             <RefreshCw />
           </Button>
@@ -158,8 +158,8 @@ function LeftPanel() {
           <h1 className="h-full text-center w-full flex items-center justify-center">
             {listError}
           </h1>
-        ) : (
-          executions?.length?executions.map((each, i) => {
+        ) : executions?.length ? (
+          executions.map((each, i) => {
             return (
               <WorkflowHistoryCard
                 key={`${each.id} - ${i}`}
@@ -167,7 +167,11 @@ function LeftPanel() {
                 item={each}
               />
             );
-          }):<div className="h-full w-full flex items-center font-semibold justify-center">No Executions Found</div>
+          })
+        ) : (
+          <div className="h-full w-full flex items-center font-semibold justify-center">
+            No Executions Found
+          </div>
         )}
       </main>
     </div>

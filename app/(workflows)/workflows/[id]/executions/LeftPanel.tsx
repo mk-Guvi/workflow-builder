@@ -92,63 +92,64 @@ function LeftPanel() {
   return (
     <div className="h-full  w-full flex flex-col">
       {total_pages >= 1 ? (
-        <header className="flex items-center border-b text-xs p-3 flex-wrap sm:flex-nowrap  gap-2">
-          <Button
-            disabled={current_page <= 1}
-            onClick={() => {
-              updateExecutionState({ current_page: current_page - 1 });
-              recordChanges();
-            }}
-            variant={"outline"}
-            size={"xs"}
-          >
-            <ChevronLeftSquareIcon />
-          </Button>
-
-          <Input
-            className="max-w-[3rem] h-7"
-            onChange={(e) => {
-              const value = parseInt(e.target.value);
-              if (value < 1 || value > total_pages) return;
-              updateExecutionState({ current_page: value });
-              recordChanges();
-            }}
-            value={current_page}
-            type="number"
-          />
-          <div>/ {total_pages}</div>
-
-          <Button
-            disabled={current_page >= total_pages}
-            variant={"outline"}
-            size={"xs"}
-            onClick={() => {
-              updateExecutionState({ current_page: current_page + 1 });
-              recordChanges();
-            }}
-          >
-            <ChevronRightSquareIcon />
-          </Button>
-          <Select value={`${page_size}`} onValueChange={onChangePageSize}>
-            <SelectTrigger className="w-[65px] h-7">
-              <SelectValue placeholder="page size" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="25">25</SelectItem>
-                <SelectItem value="50">50</SelectItem>
-                <SelectItem value="100">100</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          <Button
-            disabled={listLoading}
-            onClick={recordChanges}
-            variant={"outline"}
-            size={"xs"}
-          >
-            <RefreshCw />
-          </Button>
+        <header className="border-b text-xs p-3   ">
+          <div className="flex-wrap flex justify-center w-full items-center gap-2">
+            {" "}
+            <Button
+              disabled={current_page <= 1}
+              onClick={() => {
+                updateExecutionState({ current_page: current_page - 1 });
+                recordChanges();
+              }}
+              variant={"outline"}
+              size={"xs"}
+            >
+              <ChevronLeftSquareIcon />
+            </Button>
+            <Input
+              className="max-w-[3rem] h-7"
+              onChange={(e) => {
+                const value = parseInt(e.target.value);
+                if (value < 1 || value > total_pages) return;
+                updateExecutionState({ current_page: value });
+                recordChanges();
+              }}
+              value={current_page}
+              type="number"
+            />
+            <div>/ {total_pages}</div>
+            <Button
+              disabled={current_page >= total_pages}
+              variant={"outline"}
+              size={"xs"}
+              onClick={() => {
+                updateExecutionState({ current_page: current_page + 1 });
+                recordChanges();
+              }}
+            >
+              <ChevronRightSquareIcon />
+            </Button>
+            <Select value={`${page_size}`} onValueChange={onChangePageSize}>
+              <SelectTrigger className="w-[65px] h-7">
+                <SelectValue placeholder="page size" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            <Button
+              disabled={listLoading}
+              onClick={recordChanges}
+              variant={"outline"}
+              size={"xs"}
+            >
+              <RefreshCw />
+            </Button>
+          </div>
         </header>
       ) : null}
 

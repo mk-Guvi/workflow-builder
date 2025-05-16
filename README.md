@@ -1,6 +1,6 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
 ## Getting Started
+
+https://www.loom.com/share/f3068e019c9e43e1abaaa443a4816614?sid=4564daa8-15a7-48c8-8c92-776b00befb98
 
 First, run the development server:
 
